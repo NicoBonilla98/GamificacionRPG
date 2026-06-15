@@ -1,0 +1,452 @@
+HERO'S LEDGER
+Especificaciones de Mecánicas de Juego
+Documento para el Equipo de Desarrollo
+Versión 1.0 — Documento base de diseño
+Stack técnico: HTML + CSS + JavaScript vanilla
+Resumen del Sistema
+Hero's Ledger es una app móvil tipo RPG donde el usuario completa tareas reales para desarrollar su personaje. Las mecánicas están diseñadas para que cada hábito completado tenga un impacto visible e inmediato en el juego, creando un loop de motivación sostenible a largo plazo.
+Pantallas actuales
+Login, Quests, Boss, Expedition, Character/Status
+Atributos del personaje
+STR, INT, VIT, DIS, FOC
+Sistemas principales
+Quests, Bosses, Expediciones, Equipo, Pasivas
+1. Sistema de Quests Diarias
+Las quests son el corazón del loop diario. El usuario completa hábitos reales que se mapean directamente a misiones del juego, ganando XP y puntos de atributo con cada tarea completada.
+1.1 Estructura de una Quest
+Nombre narrativo
+Nombre en tono RPG que contextualiza el hábito real
+Descripción funcional
+El hábito real que el usuario debe completar
+Valor XP
+Definido por dificultad de la misión — a mayor dificultad, mayor XP
+Atributo asociado
+Cada quest suma puntos a un atributo específico (STR, INT, VIT, DIS o FOC)
+Daño a boss
+El valor de XP de la misión define el daño que hace al boss activo
+1.2 Repositorio y Rotación
+Las misiones son definidas por el programador en un repositorio central
+El sistema selecciona misiones aleatoriamente del repositorio cada día
+Sistema de enfriamiento de 3 días: una quest completada hoy no puede aparecer en los próximos 3 días
+Mínimo 6 misiones por atributo en el repositorio para que el enfriamiento funcione correctamente
+Las misiones no completadas rotan fuera al día siguiente — no se acumulan ni penalizan
+1.3 Sistema de Enfoque por Atributo
+El usuario puede activar un modo de enfoque para priorizar un atributo específico. La distribución de misiones con enfoque activado sigue un techo suave para mantener variedad mínima garantizada.
+Slot
+Sin enfoque
+Con enfoque (ej. STR)
+Quest 1
+Atributo aleatorio
+STR — enfoque
+Quest 2
+Atributo aleatorio
+STR — enfoque
+Quest 3
+Atributo aleatorio
+STR — enfoque
+Quest 4
+Atributo aleatorio
+Atributo aleatorio
+Quest 5
+Atributo aleatorio
+Atributo más rezagado (equilibrio silencioso)
+La Quest 5 siempre prioriza el atributo más rezagado del personaje. El usuario no lo ve; el sistema lo gestiona en silencio para evitar desbalances extremos.
+1.4 Métricas y Bonificaciones por Completitud
+El sistema registra la tasa de completitud de cada misión del repositorio
+Misiones con tasa baja pueden ajustarse: subir XP, mejorar descripción narrativa, o agregar XP de personaje adicional como incentivo
+La bonificación prioritaria para misiones rezagadas es XP de personaje adicional — no solo más XP del atributo — porque el usuario que ignora un atributo necesita una razón externa para completar esas misiones
+2. Economía de Progresión
+El sistema de progresión tiene dos capas paralelas e independientes. El nivel del personaje es el logro grande y celebrado. Los atributos son la progresión diaria visible que el usuario siente aunque el nivel no suba.
+2.1 Nivel de Personaje
+Curva exponencial — difícil de subir por diseño
+Cada subida de nivel es un momento de celebración
+Desbloquea level caps de atributos y contenido de expediciones
+Los números exactos se calibran en fase de balance — la estructura está definida
+2.2 Atributos
+5 atributos: STR (Fuerza), INT (Inteligencia), VIT (Vitalidad), DIS (Disciplina), FOC (Foco)
+Suben con cada quest completada según el atributo asociado a la misión
+Deben ser visualmente prominentes en la pantalla de personaje — no escondidos en submenús
+Pop notification al subir un atributo: muestra el atributo, puntos ganados, barra de progreso hacia el siguiente umbral de habilidad pasiva
+El color del pop corresponde al atributo: STR rojo, INT azul, VIT verde, DIS amarillo, FOC púrpura
+2.3 Sistema de Rachas
+El sistema recompensa consistencia sin penalizar ausencia. La racha no colapsa — decae gradualmente.
+Días
+Escalón
+XP Personaje
+XP Atributos
+Día 1
+1
+× 1.0 (base)
+× 1.0 (base)
+Día 5
+2
+× 1.2
+× 1.1
+Día 10
+3
+× 1.4
+× 1.2
+Día 20
+4
+× 1.8
+× 1.4
+Día 30
+5
+× 2.2
+× 1.8
+Día 50+
+6 — CAP
+× 2.5 (máximo)
+× 2.0 (máximo)
+Decaimiento gradual: al romper un día de racha, el multiplicador baja un escalón — no colapsa a base. Al romper dos días seguidos, baja otro escalón. El multiplicador aplica igual a XP de personaje y de atributos simultáneamente.
+3. Sistema de Expediciones
+Las expediciones son grupos de misiones con arco narrativo. Cada expedición es un capítulo de una historia más grande, dividida en 4 capítulos de dificultad creciente encadenados por llaves de desbloqueo.
+3.1 Estructura de un Arco Narrativo
+Capítulo 1 — Fácil
+El inicio de la historia. Misiones de rutina. Nivel recomendado: 1–5. Boss genérico al final.
+Capítulo 2 — Media
+El conflicto se revela. Misiones de esfuerzo. Nivel recomendado: 6–12. Boss más fuerte.
+Capítulo 3 — Difícil
+El clímax. Misiones exigentes. Nivel recomendado: 13–20. Boss avanzado.
+Capítulo 4 — Final
+La resolución. 7–8 misiones en total. Nivel recomendado: 21+. Boss final del arco.
+3.2 Mecánica de Llaves
+Completar un capítulo (incluido su boss) otorga una llave de desbloqueo
+La llave tiene nombre propio relacionado al arco: "Llave del Claro", "Llave de la Torre"
+La llave vive como objeto en el inventario del personaje con descripción corta
+El Capítulo 4 (Final) requiere las 3 llaves de los capítulos anteriores para desbloquearse
+Al usar una llave para abrir el siguiente capítulo hay un micro-momento de ritual — no solo un botón
+3.3 Rotación Semanal
+Existen 3 arcos activos simultáneamente en la app al lanzamiento
+Cada semana solo un arco está activo — los otros 2 están pausados
+Al pausarse un arco, el progreso se congela exactamente donde estaba (marcapáginas)
+Al retomar un arco, el usuario ve: capítulo actual, número de misión, y último beat narrativo leído
+Ciclo de rotación: Arco A → Arco B → Arco C → Arco A → ...
+Al agregar nuevos arcos en futuras actualizaciones, simplemente entran al ciclo de rotación
+3.4 Misiones dentro de la Expedición
+5–7 misiones por capítulo, completables en 3–4 días
+Ritmo natural: 2 misiones por día
+Cada misión tiene nombre narrativo + descripción del hábito real
+Al completar misiones aparecen beats narrativos — 1 o 2 líneas en tono de crónica de aventura
+La dificultad de las misiones escala progresivamente: inicio fácil, clímax exigente, cierre corto
+3.5 Recompensas de Expedición
+Objeto único con nombre y lore del arco (ej. "Espada de Valdris — forjada por Mira, exploradora de Valdris")
+Recompensas aumentadas vs bosses genéricos
+Consumibles especiales exclusivos de expedición
+Fragmento de lore del mundo — 2 o 3 líneas que expanden el universo
+El NPC narrativo del arco puede aparecer aleatoriamente en batallas contra bosses normales tras completar la expedición
+3.6 Onboarding al Sistema
+El primer boss de la app actúa como puerta de entrada al sistema de expediciones
+Al derrotar el primer boss, se desbloquea la Expedición 1 con un fragmento de lore como gancho
+La Expedición 1 no tiene caducidad temporal — es corta (3–4 misiones) y sirve para enseñar la mecánica
+El sistema de rotación semanal con los 3 arcos se activa después de completar la Expedición 1
+Los capítulos muestran nivel recomendado como orientación, no como bloqueo
+Si el usuario está por debajo del nivel recomendado: indicador ámbar + línea de texto contextual
+El nivel recomendado por capítulo se define solo por nivel de personaje en el lanzamiento. En versiones futuras puede incluir requisitos de atributos específicos.
+4. Sistema de Bosses
+Existen dos tipos de bosses con mecánicas similares pero contextos y recompensas distintas. Ambos usan el mismo sistema de combate extendido durante el día.
+4.1 Tipos de Boss
+Boss Genérico
+• Accesible en cualquier momento
+• Vida moderada — resoluble en 1 día
+• NPC básico de apoyo (uno por atributo)
+• Drop: equipo común o raro
+• Cura ~20% de vida si no es derrotado ese día
+Boss de Expedición
+• Solo disponible al final de cada capítulo
+• Vida alta — puede durar 2–3 días
+• NPC narrativo del arco activo
+• Drop: equipo raro, épico y reliquia
+• Cura ~10% de vida si no es derrotado ese día
+4.2 Pantalla de Preparación
+Antes de iniciar un combate, el usuario pasa por una pantalla de preparación con tres secciones:
+Inteligencia del Boss (Hints por INT)
+INT < 10
+"Un enemigo poderoso acecha. Prepárate."
+INT ≥ 25
+Información táctica: debilidades generales y qué tipo de NPC conviene
+INT ≥ 50
+Revela debilidad específica del boss y drop garantizado si se usa la estrategia correcta
+Selección de NPC
+El usuario elige un NPC de apoyo antes de iniciar el combate
+Boss genérico: muestra los 5 NPCs básicos disponibles
+Boss de expedición: muestra solo los NPCs narrativos encontrados en el arco activo
+Cada NPC tiene su atributo dominante visible para guiar la decisión estratégica
+Equipar Consumibles
+El usuario ve su stock disponible de consumibles
+Puede equipar máximo 1 consumible por tipo por día de combate
+Los consumibles se activan al iniciar el combate — no durante las misiones
+Un resumen final muestra: daño estimado por misión, PV actuales, bonus activos
+4.3 Pantalla de Combate Activo
+Zona de batalla (parte superior)
+Ilustración central: personaje vs boss
+NPC al lateral con animación de apoyo en cada golpe
+Barra de vida del boss: visible en la parte superior de la imagen
+Barra de PV del personaje: visible en la parte inferior de la imagen
+Consumibles activos (parte media)
+Lista de consumibles equipados para ese día con sus efectos activos
+Indicador visual de que se consumirán al terminar el día de combate
+Lista de misiones (parte inferior)
+Muestra las misiones del día con el daño que cada una hace al boss
+A mayor dificultad de la misión, mayor el daño — visible junto a cada misión
+Las misiones completadas muestran "daño aplicado" con estilo visual diferenciado
+4.4 Mecánica de Combate
+Ritmo de intercambio
+El usuario completa una misión → el personaje ataca → el boss contraataca
+La barra de vida del boss baja en tiempo real al marcar una misión como completada
+El daño del personaje = valor XP de la misión × modificador de stats × bonus del equipo × bonus de pasivas × bonus del NPC
+El daño del boss al personaje se mitiga por VIT del personaje
+Ataque devastador nocturno
+Si el boss sigue vivo al cierre del día, ejecuta un ataque que vacía todos los PV del personaje
+Con VIT alta: el ataque devastador se absorbe parcialmente, el personaje no llega a 0 PV
+Con VIT baja: el personaje llega a 0 PV y entra en estado de descanso
+Curación del boss entre días
+Boss genérico: recupera ~20% de su vida si no fue derrotado ese día
+Boss de expedición: recupera ~10% de su vida si no fue derrotado ese día
+El progreso de daño acumulado del día anterior se mantiene (descontando la curación)
+4.5 Estado de Descanso
+Se activa cuando los PV del personaje llegan a 0 durante el combate o al cierre del día
+Durante el descanso el usuario puede: completar quests normales, usar consumibles para recuperar PV, seguir avanzando misiones de expedición
+Durante el descanso el usuario NO puede: retar a ningún boss (genérico ni de expedición)
+El combate se puede retomar cuando los PV superen el 50% de su máximo
+VIT define la velocidad de recuperación natural de PV — a más VIT, menos días de descanso
+La pantalla de boss durante el descanso muestra: barra de PV con progreso de recuperación + línea narrativa contextual ("El héroe necesita recuperar fuerzas antes de volver al combate")
+La racha de quests no se rompe por estar en estado de descanso
+5. Sistema de NPCs
+Existen dos tipos de NPCs con contextos completamente separados. Nunca deben mezclarse en la misma pantalla de selección.
+5.1 NPCs Básicos — Bosses Genéricos
+Un NPC básico por cada atributo. Disponibles para todos los combates contra bosses genéricos. Se desbloquean progresivamente conforme el usuario avanza de nivel (a definir en balance).
+Atributo
+Tipo NPC
+Efecto en combate
+Cuándo conviene usarlo
+STR
+Guerrero
+Daño adicional por cada misión completada
+Boss con mucha vida — para terminar rápido
+INT
+Sabio
++XP de todas las misiones del combate
+Cuando el usuario quiere maximizar XP del día
+VIT
+Sanador
+Cura parcial de PV tras el contraataque del boss
+Cuando el personaje tiene PV bajos
+DIS
+Explorador
+Mejora la rareza de los drops del boss
+Cuando se busca equipo específico
+FOC
+Mago
+Reduce el daño de los ataques normales del boss
+Para sobrevivir el día sin llegar a 0 PV
+5.2 NPCs Narrativos — Bosses de Expedición
+Se introducen como personajes dentro de las misiones del arco — el usuario los conoce antes de poder reclutarlos
+Al llegar al boss de expedición, las 5 misiones cortas de reclutamiento son narrativamente "ir a buscarlos"
+Cada NPC narrativo tiene un atributo dominante que da un bonus específico contra ese boss
+Tras completar el arco, el NPC puede aparecer aleatoriamente en bosses genéricos con frecuencia baja pero consistente
+En cada reaparición el NPC tiene una línea de diálogo contextual única
+Regla crítica de separación de rosters: en bosses genéricos SOLO aparecen NPCs básicos. En bosses de expedición SOLO aparecen los NPCs narrativos del arco activo. Esta separación debe mantenerse en toda la UI.
+6. Sistema de Equipo
+El equipo da bonus de stats al personaje. El sistema usa ranuras fijas sin inventario para minimizar la fricción de gestión.
+6.1 Ranuras de Equipo
+Ranura
+Stat Principal
+Stat Secundario
+Nota
+Arma
+STR
+DIS
+Armadura
+VIT
+STR
+Accesorio
+FOC / INT
+Variable
+Casco
+INT
+FOC
+Botas
+DIS
+VIT
+Reliquia
+Todos los stats
+—
+Solo ítems épicos de expedición. No reemplazable.
+6.2 Sistema de Rareza
+Común
++1 stat principal. Fuente: bosses genéricos. Drop frecuente.
+Raro
++2 stat principal, +1 secundario. Fuente: boss genérico con racha alta o boss de expedición.
+Épico
++3 stat principal, +2 secundario. Fuente: arco completo o boss final de expedición.
+6.3 Escalado por Umbral
+Todo ítem es útil desde el primer día. El umbral define cuándo alcanza su potencial completo. No hay bloqueo — hay meta.
+Cada ítem tiene un estado Base (activo siempre) y un estado Completo (activo al cumplir la condición)
+El umbral puede ser de nivel del personaje O de atributo específico — cada ítem define el suyo
+Un solo umbral por ítem (no hay estados intermedios)
+El umbral ideal está a 2–3 semanas de juego constante desde el nivel en que dropea el ítem
+Visualización en pantalla
+Sin umbral cumplido: bonus base en color normal, bonus completo en gris, condición destacada en ámbar
+Al cumplir el umbral: pop de "ítem despertado", bonus completo en color vivo, condición tachada en verde
+Reliquias épicas: muestran nombre del arco, fecha de obtención y lore corto del objeto
+6.4 Flujo de Reemplazo
+Al conseguir un ítem nuevo en la misma ranura, el usuario decide: equipar (el viejo se descarta) o descartar (el nuevo desaparece)
+No existe inventario de ítems — una ranura, una pieza en todo momento
+Excepción: las Reliquias épicas de expedición se guardan como trofeos permanentes en el Archivo del Héroe y no son reemplazables
+7. Habilidades Pasivas
+Cada atributo desbloquea habilidades pasivas únicas al alcanzar umbrales específicos. Las pasivas están enfocadas en beneficios de combate y mejora de drops.
+Umbrales: 10 · 25 · 50 · 100 puntos de atributo (irregulares por diseño — el primer desbloqueo llega rápido para generar enganche temprano).
+7.1 Pasivas de STR — Fuerza
+STR ≥ 10 — Golpe Firme
++5% de daño contra bosses genéricos
+STR ≥ 25 — Fuerza Bruta
++10% de daño. El drop de boss genérico mejora en 1 nivel de rareza
+STR ≥ 50 — Ímpetu
++15% de daño. Los bosses genéricos tienen chance de drop doble
+STR ≥ 100 — Campeón
+Inmunidad al primer golpe del boss. Drop épico garantizado una vez por semana
+7.2 Pasivas de INT — Inteligencia
+INT ≥ 10 — Mente Aguda
++5% de XP de todas las quests
+INT ≥ 25 — Conocimiento
++10% de XP. Revela la rareza del drop antes de iniciar el combate
+INT ≥ 50 — Sabiduría
++15% de XP. Las misiones de INT del repositorio dan bonus adicional
+INT ≥ 100 — Archimago
++25% de XP global. Desbloquea misiones de INT exclusivas en el repositorio
+7.3 Pasivas de VIT — Vitalidad
+VIT ≥ 10 — Resistencia
+Los bosses genéricos dan un reintento si el personaje es derrotado
+VIT ≥ 25 — Temple
+2 reintentos contra boss genérico. Los drops de consumibles son mejorados
+VIT ≥ 50 — Fortaleza
+3 reintentos. Los consumibles de expedición duran más (definir en balance)
+VIT ≥ 100 — Inmortal
+Reintentos ilimitados en bosses genéricos. Boss de expedición da un reintento extra
+7.4 Pasivas de DIS — Disciplina
+DIS ≥ 10 — Enfoque
+La racha no decae si el usuario falla 1 día a la semana
+DIS ≥ 25 — Constancia
+La racha no decae si el usuario falla 2 días a la semana. El multiplicador sube más rápido
+DIS ≥ 50 — Disciplina
+La racha no decae si el usuario falla 3 días a la semana. Enfriamiento de quests reducido a 2 días
+DIS ≥ 100 — Maestría
+La racha nunca decae. Enfriamiento de quests reducido a 1 día
+7.5 Pasivas de FOC — Foco
+FOC ≥ 10 — Concentración
++1 misión de enfoque disponible por día (pendiente definir límite base)
+FOC ≥ 25 — (a definir)
+A definir en siguiente iteración de diseño
+FOC ≥ 50 — (a definir)
+A definir en siguiente iteración de diseño
+FOC ≥ 100 — Iluminado
+FOC potencia todos los atributos +5%. Desbloquea misiones de FOC exclusivas en el repositorio
+Las pasivas de FOC de nivel medio (25 y 50) están pendientes de definir. Se documentarán en la siguiente iteración de diseño.
+8. Sistema de Consumibles
+Los consumibles tienen dos roles: recuperar PV del personaje y dar bonus temporales durante el combate. Se consiguen como drops de quests, bosses y expediciones.
+8.1 Categoría 1 — Recuperación de PV
+Tipo
+Nombre
+Efecto
+Fuente
+Menor
+Poción de Hierba
+Recupera 25% PV
+Quests comunes — drop frecuente
+Media
+Elixir del Bosque
+Recupera 60% PV
+Boss genérico — drop ocasional
+Mayor
+Esencia de Expedición
+Recupera PV completos
+Solo expediciones — drop raro
+8.2 Categoría 2 — Bonus Temporales de Combate
+Tipo
+Nombre
+Efecto
+Fuente
+Ofensivo
+Tónico de Batalla
++20% daño al boss ese día de combate
+Boss genérico o quests de STR
+Defensivo
+Amuleto de Escudo
+Absorbe el ataque devastador nocturno una vez
+Solo expediciones — drop poco frecuente
+Especial
+Cristal de NPC
+El NPC hace el doble de daño ese día de combate
+Solo expediciones. El nombre varía según el NPC del arco
+8.3 Reglas de Stock y Uso
+Stock máximo de pociones (recuperación): 10 unidades
+Stock máximo de amuletos y consumibles raros: 5 unidades
+Al superar el stock máximo, los consumibles adicionales se convierten en XP adicional
+En futuras versiones con tienda, el excedente se convertirá en oro en lugar de XP
+Máximo 1 consumible por tipo por día de combate
+Los consumibles se usan antes de iniciar el combate — no durante las misiones del día
+Sin límite de acumulación por debajo del máximo — el usuario administra su stock estratégicamente
+9. Archivo del Héroe
+El Archivo del Héroe es el registro histórico del personaje. Vive como pestaña secundaria dentro de la pantalla de Personaje/Status. Muestra todo lo que ese héroe ha vivido.
+9.1 Sección: Identidad del Héroe
+Nombre del personaje
+Nivel actual
+Fecha de inicio de la aventura
+Título dinámico: ganado por el arco más reciente completado (ej. "Guardián de Valdris", "Escalador de Grath")
+Los títulos se generan automáticamente al completar cada arco. Al agregar nuevos arcos en futuras actualizaciones, los nuevos títulos se generan sin cambios de sistema.
+9.2 Sección: Historial de Arcos
+Lista de todos los arcos con su estado: completado, en curso, pausado, bloqueado
+Arcos completados muestran: nombre, fechas de inicio y fin, días totales, boss final derrotado, línea de cierre narrativo
+Arco en curso muestra: capítulo actual, número de misión, fecha de inicio, llaves obtenidas
+Arcos bloqueados aparecen con opacidad reducida y la condición de desbloqueo visible
+9.3 Sección: Reliquias
+Galería de reliquias épicas obtenidas en expediciones
+Cada reliquia muestra: nombre del objeto, nombre del arco, fecha de obtención, lore corto
+Las reliquias de arcos no completados aparecen como siluetas con signo de interrogación
+Las siluetas bloqueadas son un gancho narrativo permanente — el usuario ve cuántas historias le faltan
+Las reliquias son permanentes — no se pueden reemplazar ni descartar
+9.4 Sección: Estadísticas Históricas
+Actividad
+• Quests completadas total
+• Racha máxima alcanzada
+• Días activos total
+Combate
+• Bosses derrotados total
+• Bosses genéricos vs expedición
+• Boss más derrotado
+Crecimiento
+• Atributo más alto actual
+• Nivel máximo alcanzado
+• Ítems épicos obtenidos
+10. Backlog — Funcionalidades Futuras
+Las siguientes funcionalidades están diseñadas conceptualmente pero se implementarán en actualizaciones posteriores al lanzamiento.
+Funcionalidad
+Descripción
+Separación de rosters
+NPCs narrativos solo en bosses de expedición. NPCs básicos solo en bosses genéricos. La separación existe por diseño — implementar cuando se agreguen NPCs narrativos al juego.
+Mascotas
+Compañeros que dan un atributo adicional y crecen con el personaje a lo largo del tiempo.
+Quests especiales
+Misiones con tiempo límite, misiones encadenadas (una desbloquea la siguiente en el mismo día), y misiones bonus sorpresa.
+FOC pasivas medias
+Definir las pasivas de FOC en los umbrales 25 y 50.
+Tienda y oro
+Sistema de moneda. El excedente de consumibles sobre el stock máximo se convierte en oro en lugar de XP.
+Estado de retorno
+Qué ve el usuario al volver a un arco pausado después de semanas — pantalla de resumen narrativo.
+Estadísticas comparativas
+Contexto de las estadísticas del Archivo del Héroe respecto a otros jugadores del mismo nivel.
+Desbloqueo progresivo de NPCs
+Los NPCs básicos se desbloquean progresivamente por nivel en lugar de estar todos disponibles desde el inicio.
+11. Puntos Pendientes de Definición
+Los siguientes puntos del diseño requieren definición antes de implementarse.
+Balance numérico exacto: valores de XP por nivel, daño por quest, PV máximos del personaje, PV de bosses genéricos y de expedición
+Frecuencia de aparición del NPC narrativo en bosses genéricos tras completar su arco
+Número de misiones de enfoque disponibles por día con FOC base (para definir la pasiva de FOC ≥ 10)
+Pasivas de FOC en umbrales 25 y 50
+Cuántas misiones de tipo enfoque puede pedir el usuario por día antes de que el sistema aplique el techo suave
+Velocidad exacta de recuperación de PV natural por día según VIT
+Condición exacta de desbloqueo progresivo de NPCs básicos por nivel
+Pantalla de retorno: diseño de la pantalla que ve el usuario al retomar un arco pausado
+Este documento refleja las mecánicas definidas en la sesión de diseño. Los números exactos de balance se calibran en fase de testing. La arquitectura del sistema está completa.

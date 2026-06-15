@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Cristal de personaje">
+  <rect width="96" height="96" rx="48" fill="#17100c"/>
+  <path d="M48 8 72 38 58 88 48 72 38 88 24 38 48 8Z" fill="#37424a"/>
+  <path d="M48 8v64L24 38 48 8Z" fill="#6f828e"/>
+  <path d="M48 8v64l24-34L48 8Z" fill="#1f2a33"/>
+  <path d="M38 88 48 72 58 88H38Z" fill="#11191f"/>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" shape-rendering="crispEdges" role="img" aria-label="Heroe pixel art">
+  <rect width="80" height="80" fill="none"/>
+  <rect x="30" y="8" width="20" height="8" fill="#6b3415"/>
+  <rect x="24" y="16" width="32" height="8" fill="#8c4c1f"/>
+  <rect x="28" y="24" width="24" height="8" fill="#f0b36f"/>
+  <rect x="32" y="24" width="4" height="4" fill="#141414"/>
+  <rect x="48" y="24" width="4" height="4" fill="#141414"/>
+  <rect x="28" y="32" width="24" height="4" fill="#d38b52"/>
+  <rect x="20" y="34" width="40" height="18" fill="#143b70"/>
+  <rect x="24" y="38" width="32" height="8" fill="#1f5ba0"/>
+  <rect x="36" y="34" width="8" height="20" fill="#c9902f"/>
+  <rect x="16" y="38" width="8" height="18" fill="#102945"/>
+  <rect x="56" y="38" width="8" height="14" fill="#102945"/>
+  <rect x="14" y="52" width="14" height="8" fill="#f0b36f"/>
+  <rect x="54" y="50" width="12" height="8" fill="#f0b36f"/>
+  <rect x="24" y="52" width="12" height="16" fill="#2b2f38"/>
+  <rect x="44" y="52" width="12" height="16" fill="#2b2f38"/>
+  <rect x="20" y="68" width="16" height="6" fill="#1a1612"/>
+  <rect x="44" y="68" width="16" height="6" fill="#1a1612"/>
+  <rect x="60" y="16" width="4" height="40" fill="#dfe7ee" transform="rotate(45 62 36)"/>
+  <rect x="62" y="8" width="4" height="28" fill="#ffffff" transform="rotate(45 64 22)"/>
+  <rect x="52" y="44" width="10" height="4" fill="#a67824"/>
+  <rect x="8" y="40" width="8" height="18" fill="#0f2748"/>
+  <rect x="4" y="52" width="8" height="8" fill="#0b1c34"/>
+</svg>

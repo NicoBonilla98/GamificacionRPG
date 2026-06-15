@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>Hero's Ledger</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="phone-shell" aria-live="polite">
+      <!-- ===================== LOGIN ===================== -->
+      <section id="login-screen" class="screen login-screen active">
+        <div class="brand-mark">
+          <img src="./assets/ledger-mark.svg" alt="" />
+        </div>
+        <h1>Hero's<br />Ledger</h1>
+        <p>Convierte tus hábitos reales en la leyenda de tu héroe.</p>
+
+        <form id="login-form" class="login-card">
+          <label>
+            <span>Nombre del héroe</span>
+            <input id="user-name" name="name" autocomplete="name" placeholder="Ej. Thorne de Valdris" required />
+          </label>
+          <label>
+            <span>Llave de la bóveda</span>
+            <input id="user-key" name="password" type="password" placeholder="••••••••" required />
+          </label>
+          <button class="primary-button" type="submit">Comenzar la aventura</button>
+        </form>
+      </section>
+
+      <!-- ===================== APP ===================== -->
+      <section id="app-screen" class="screen app-screen">
+        <header class="topbar">
+          <div class="avatar"><img src="./assets/pixel-hero.svg" alt="" /></div>
+          <div class="topbar-id">
+            <span id="level-label" class="level-label">Nivel 1</span>
+            <h2 id="topbar-name">Hero's Ledger</h2>
+          </div>
+          <div id="streak-chip" class="streak-chip" title="Racha de constancia">
+            <span class="streak-flame">🔥</span>
+            <strong id="streak-days">0</strong>
+          </div>
+        </header>
+
+        <!-- ---------- QUESTS ---------- -->
+        <section id="quests-view" class="view active">
+          <div class="rank-panel">
+            <div class="rank-row">
+              <h3 id="rank-title">Aprendiz</h3>
+              <strong id="xp-label">0 / 0 XP</strong>
+            </div>
+            <div class="progress-track"><span id="xp-bar"></span></div>
+            <div class="streak-strip">
+              <div>
+                <span class="level-label">Racha</span>
+                <strong id="streak-detail">Día 1 · Escalón 1</strong>
+              </div>
+              <div class="streak-mults">
+                <span id="streak-char-mult" title="Multiplicador de XP de personaje">×1.0 XP</span>
+                <span id="streak-attr-mult" title="Multiplicador de XP de atributos">×1.0 ATR</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="focus-bar">
+            <span class="level-label">Enfoque del día</span>
+            <div id="focus-options" class="focus-options"></div>
+          </div>
+
+          <div class="section-heading">
+            <h3>Misiones Diarias</h3>
+            <span id="pending-count" class="pill">0 pendientes</span>
+          </div>
+          <div id="quest-list" class="quest-list"></div>
+
+          <div class="midnight-note">
+            <span>⌛</span>
+            <strong>Nuevas misiones a medianoche · sin penalización</strong>
+          </div>
+        </section>
+
+        <!-- ---------- BOSS ---------- -->
+        <section id="boss-view" class="view">
+          <div id="boss-mode-prep" class="boss-mode">
+            <article class="boss-card">
+              <div class="boss-art"><img id="boss-art-img" src="./assets/void-dragon.svg" alt="" /></div>
+              <span id="boss-type" class="boss-type">Boss Genérico</span>
+              <h3 id="boss-name">Malakor el Tocado por el Vacío</h3>
+              <div class="hp-track">
+                <span id="boss-hp-bar"></span>
+                <strong id="boss-hp-label">0 / 0 PV</strong>
+              </div>
+            </article>
+
+            <div class="section-heading"><h3>Inteligencia del Boss</h3><span id="int-tier-pill" class="pill">INT 0</span></div>
+            <div id="boss-intel" class="boss-intel"></div>
+
+            <div class="section-heading"><h3>NPC de Apoyo</h3><span id="npc-roster-pill" class="pill">Roster Básico</span></div>
+            <div id="npc-list" class="recruitment-list"></div>
+
+            <div class="section-heading"><h3>Consumibles de Combate</h3><span id="consumable-pill" class="pill">0 equipados</span></div>
+            <div id="combat-consumables" class="consumable-list"></div>
+
+            <div class="prep-summary">
+              <div><span class="level-label">PV del héroe</span><strong id="hero-hp-label">0 / 0</strong></div>
+              <div><span class="level-label">Daño estimado / misión</span><strong id="dmg-estimate">+0</strong></div>
+              <div><span class="level-label">Bonus activos</span><strong id="active-bonus">—</strong></div>
+            </div>
+          </div>
+
+          <div class="section-heading"><h3>Misiones de Combate</h3><span id="damage-potential">+0 daño acumulado</span></div>
+          <div id="battle-list" class="battle-list"></div>
+
+          <div id="battle-stage" class="battle-stage" aria-label="Escena de combate pixel art">
+            <div class="stage-label">Pixel Battle</div>
+            <div class="sprite-wrap hero-wrap">
+              <img class="pixel-sprite hero-sprite" src="./assets/pixel-hero.svg" alt="" />
+              <span class="power-aura"></span>
+            </div>
+            <span class="slash-effect"></span>
+            <span class="impact-burst"></span>
+            <div class="sprite-wrap monster-wrap">
+              <img class="pixel-sprite monster-sprite" src="./assets/pixel-monster.svg" alt="" />
+            </div>
+          </div>
+
+          <button id="attack-button" class="primary-button attack-button" type="button">⚔ Desatar ataque</button>
+          <button id="end-day-button" class="ghost-button" type="button">Simular cierre del día (ataque nocturno)</button>
+          <p id="rest-note" class="rest-note hidden"></p>
+        </section>
+
+        <!-- ---------- EXPEDITION ---------- -->
+        <section id="expedition-view" class="view">
+          <div class="expedition-hero">
+            <span class="level-label">Arco activo · rotación semanal</span>
+            <h3 id="expedition-title">El Bosque de Valdris</h3>
+            <p id="expedition-summary"></p>
+            <div class="progress-track expedition-progress"><span id="expedition-bar"></span></div>
+            <strong id="expedition-progress-label">0 / 4 capítulos</strong>
+          </div>
+
+          <div class="section-heading"><h3>Arcos en rotación</h3></div>
+          <div id="arc-rotation" class="arc-rotation"></div>
+
+          <div class="section-heading"><h3>Capítulos</h3><span id="keys-pill" class="pill">0 llaves</span></div>
+          <div id="chapter-map" class="chapter-map"></div>
+
+          <div class="section-heading"><h3>Recompensa del arco</h3></div>
+          <div id="expedition-reward" class="expedition-reward"></div>
+        </section>
+
+        <!-- ---------- CHARACTER ---------- -->
+        <section id="character-view" class="view">
+          <div class="char-tabs">
+            <button class="char-tab active" data-pane="status-pane" type="button">Status</button>
+            <button class="char-tab" data-pane="archive-pane" type="button">Archivo del Héroe</button>
+          </div>
+
+          <div id="status-pane" class="char-pane active">
+            <div class="character-card">
+              <div>
+                <span class="level-label">Status</span>
+                <h3 id="character-name">Héroe</h3>
+                <p id="character-summary">Nivel 1</p>
+              </div>
+              <div class="stat-grid">
+                <span><strong id="total-xp">0</strong> XP total</span>
+                <span><strong id="completed-total">0</strong> quests</span>
+                <span><strong id="bosses-total">0</strong> bosses</span>
+              </div>
+            </div>
+
+            <div class="section-heading"><h3>Atributos</h3><span id="build-archetype" class="pill">Novato</span></div>
+            <div id="attribute-list" class="attribute-list"></div>
+
+            <div class="section-heading"><h3>Equipo</h3></div>
+            <div id="equipment-list" class="equipment-list"></div>
+
+            <div class="section-heading"><h3>Habilidades Pasivas</h3></div>
+            <div id="passive-list" class="passive-list"></div>
+
+            <div class="section-heading"><h3>Inventario de Consumibles</h3></div>
+            <div id="inventory-list" class="inventory-list"></div>
+          </div>
+
+          <div id="archive-pane" class="char-pane">
+            <div class="character-card">
+              <div>
+                <span class="level-label">Identidad del Héroe</span>
+                <h3 id="archive-name">Héroe</h3>
+                <p id="archive-title">Sin título aún</p>
+              </div>
+              <div class="stat-grid">
+                <span><strong id="archive-level">1</strong> nivel</span>
+                <span><strong id="archive-start">—</strong> inicio</span>
+                <span><strong id="archive-streak-max">0</strong> racha máx</span>
+              </div>
+            </div>
+
+            <div class="section-heading"><h3>Historial de Arcos</h3></div>
+            <div id="arc-history" class="arc-history"></div>
+
+            <div class="section-heading"><h3>Reliquias</h3></div>
+            <div id="relic-gallery" class="relic-gallery"></div>
+
+            <div class="section-heading"><h3>Estadísticas Históricas</h3></div>
+            <div id="historic-stats" class="historic-stats"></div>
+          </div>
+        </section>
+
+        <nav class="tabbar" aria-label="Navegación principal">
+          <button class="tab active" data-view="quests-view" type="button">⚔<span>Quests</span></button>
+          <button class="tab" data-view="boss-view" type="button">♜<span>Boss</span></button>
+          <button class="tab" data-view="expedition-view" type="button">✦<span>Expedición</span></button>
+          <button class="tab" data-view="character-view" type="button">✥<span>Héroe</span></button>
+        </nav>
+      </section>
+
+      <!-- pop notifications -->
+      <div id="toast-stack" class="toast-stack" aria-live="assertive"></div>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
