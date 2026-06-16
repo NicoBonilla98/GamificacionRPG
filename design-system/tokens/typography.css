@@ -1,0 +1,49 @@
+/* =========================================================================
+   HERO'S LEDGER — TYPOGRAPHY TOKENS
+   Two voices: an engraved SERIF for display/headings (the "ledger" voice),
+   and a sturdy system SANS for UI/labels/body (the "interface" voice).
+   A monospace is used sparingly for diegetic stage labels.
+   The product ships with system fonts by design — no webfont dependency.
+   ========================================================================= */
+:root {
+  /* ---- Families ---- */
+  --hl-font-display: Georgia, "Times New Roman", serif;
+  --hl-font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --hl-font-mono: "Courier New", ui-monospace, "SFMono-Regular", monospace;
+
+  /* ---- Semantic family aliases ---- */
+  --font-heading: var(--hl-font-display);
+  --font-body: var(--hl-font-ui);
+  --font-label: var(--hl-font-ui);
+  --font-mono: var(--hl-font-mono);
+
+  /* ---- Display scale (serif, gold, often uppercase) ---- */
+  --type-hero: 700 clamp(3rem, 15vw, 5rem)/0.92 var(--hl-font-display);   /* login wordmark */
+  --type-display: 700 2rem/1 var(--hl-font-display);                       /* boss name */
+  --type-title: 700 1.85rem/1 var(--hl-font-display);                      /* section / rank titles */
+  --type-h4: 700 1.55rem/1.1 var(--hl-font-display);                       /* card headings */
+  --type-topbar: 700 1.5rem/1 var(--hl-font-display);                      /* app name in topbar */
+
+  /* ---- UI / body scale (sans) ---- */
+  --type-body: 400 1rem/1.45 var(--hl-font-ui);
+  --type-body-sm: 400 0.82rem/1.4 var(--hl-font-ui);
+  --type-button: 950 1rem/1 var(--hl-font-ui);
+  --type-label: 900 0.75rem/1 var(--hl-font-ui);   /* the eyebrow / level-label */
+  --type-pill: 900 0.85rem/1 var(--hl-font-ui);
+  --type-micro: 900 0.72rem/1.3 var(--hl-font-ui);
+
+  /* ---- Weights ---- */
+  --weight-body: 400;
+  --weight-strong: 700;
+  --weight-label: 900;     /* labels & pills run heavy */
+  --weight-button: 950;    /* buttons are the heaviest */
+
+  /* ---- Tracking ---- */
+  --track-label: 0.12em;   /* uppercase eyebrows */
+  --track-button: 0.1em;   /* uppercase CTA text */
+  --track-boss: 0.16em;    /* boss-type kicker */
+
+  /* ---- Engraved text-shadow under gold display type ---- */
+  --text-engrave: 0 2px 0 var(--hl-gold-edge);
+  --text-engrave-glow: 0 3px 0 var(--hl-gold-edge), 0 0 22px rgba(242, 204, 69, 0.35);
+}

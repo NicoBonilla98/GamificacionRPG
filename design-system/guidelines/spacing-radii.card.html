@@ -1,0 +1,28 @@
+<!-- @dsCard group="Spacing" viewport="700x170" name="Radii & tracks" subtitle="Soft 8–14px corners; pill-rounded progress wells" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 24px; display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+  .col { text-align: center; }
+  .box { width: 84px; height: 64px; background: var(--grad-card); border: 1px solid var(--border-hairline); }
+  .nm { margin-top: 8px; font: var(--type-micro); color: var(--hl-muted); font-weight: 400; text-transform: none; }
+  .tracks { flex: 1; min-width: 200px; display: grid; gap: 12px; }
+  .track { background: var(--hl-ink-well); box-shadow: var(--shadow-well); border-radius: var(--radius-pill); overflow: hidden; }
+  .track span { display: block; height: 100%; background: var(--grad-gold-bar); border-radius: inherit; }
+</style>
+</head>
+<body>
+  <div class="col"><div class="box" style="border-radius:var(--radius-xs)"></div><div class="nm">xs · 5</div></div>
+  <div class="col"><div class="box" style="border-radius:var(--radius-sm)"></div><div class="nm">sm · 8</div></div>
+  <div class="col"><div class="box" style="border-radius:var(--radius-md)"></div><div class="nm">md · 10</div></div>
+  <div class="col"><div class="box" style="border-radius:var(--radius-xl)"></div><div class="nm">xl · 14</div></div>
+  <div class="tracks">
+    <div class="track" style="height:10px"><span style="width:62%"></span></div>
+    <div class="track" style="height:16px"><span style="width:48%"></span></div>
+    <div class="track" style="height:20px"><span style="width:74%;background:var(--grad-hp-bar)"></span></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!-- @dsCard group="Type" viewport="700x250" name="Interface — system sans" subtitle="Heavy uppercase labels, sturdy body, heaviest buttons" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 24px; }
+  .stack { display: grid; gap: 18px; }
+  .line { display: flex; align-items: baseline; gap: 16px; }
+  .meta { font: var(--type-micro); color: var(--hl-faint); font-weight: 400; white-space: nowrap; }
+  .eyebrow { font: var(--type-label); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--hl-muted); }
+  .body { font: var(--type-body); color: var(--hl-ink); max-width: 360px; }
+  .small { font: var(--type-body-sm); color: var(--hl-muted); }
+  .btn { font: var(--type-button); letter-spacing: var(--track-button); text-transform: uppercase; color: var(--text-on-gold); background: var(--grad-gold-button); padding: 10px 18px; border-radius: 10px; }
+</style>
+</head>
+<body>
+  <div class="stack">
+    <div class="line"><div class="eyebrow">Enfoque del día</div><div class="meta">label · 0.75rem · 900 · uppercase · tracked</div></div>
+    <div class="line"><div class="body">Convierte tus hábitos reales en la leyenda de tu héroe.</div><div class="meta">body · 1rem · 1.45 leading</div></div>
+    <div class="line"><div class="small">30 min de entrenamiento de fuerza.</div><div class="meta">body-sm · 0.82rem · muted</div></div>
+    <div class="line"><div class="btn">Comenzar la aventura</div><div class="meta">button · 950 weight · uppercase</div></div>
+  </div>
+</body>
+</html>

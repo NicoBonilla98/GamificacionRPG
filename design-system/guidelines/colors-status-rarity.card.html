@@ -1,0 +1,31 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Status & Rarity" subtitle="Combat feedback and loot tiers" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 22px; display: flex; gap: 28px; }
+  .group { display: flex; gap: 12px; }
+  .lab { font: var(--type-label); letter-spacing: var(--track-label); text-transform: uppercase; color: var(--hl-faint); writing-mode: vertical-rl; transform: rotate(180deg); }
+  .sw { width: 96px; }
+  .chip { height: 64px; border-radius: 10px; display: grid; place-items: center; }
+  .chip span { font: var(--type-micro); }
+  .nm { margin-top: 7px; font: var(--type-micro); color: var(--hl-muted); font-weight: 400; text-transform: none; }
+</style>
+</head>
+<body>
+  <div class="group">
+    <div class="lab">Status</div>
+    <div class="sw"><div class="chip" style="background:rgba(212,59,74,0.16);border:1px solid var(--hl-danger)"><span style="color:var(--hl-danger)">defeat</span></div><div class="nm">danger</div></div>
+    <div class="sw"><div class="chip" style="background:rgba(255,179,173,0.12);border:1px solid var(--hl-rose)"><span style="color:var(--hl-rose)">rest</span></div><div class="nm">rose</div></div>
+    <div class="sw"><div class="chip" style="background:rgba(126,203,142,0.12);border:1px solid var(--hl-green)"><span style="color:var(--hl-green)">success</span></div><div class="nm">green</div></div>
+  </div>
+  <div class="group">
+    <div class="lab">Rarity</div>
+    <div class="sw"><div class="chip" style="background:rgba(255,255,255,0.08)"><span style="color:var(--hl-rarity-common)">Común</span></div><div class="nm">common</div></div>
+    <div class="sw"><div class="chip" style="background:rgba(76,177,255,0.14)"><span style="color:var(--hl-rarity-rare)">Raro</span></div><div class="nm">rare</div></div>
+    <div class="sw"><div class="chip" style="background:rgba(177,139,255,0.16)"><span style="color:var(--hl-rarity-epic)">Épico</span></div><div class="nm">epic</div></div>
+  </div>
+</body>
+</html>

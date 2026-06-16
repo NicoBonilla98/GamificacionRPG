@@ -1,0 +1,26 @@
+<!-- @dsCard group="Type" viewport="700x230" name="Display — engraved serif" subtitle="Georgia serif, gold, often uppercase, engraved shadow" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 24px; }
+  .stack { display: grid; gap: 16px; }
+  .line { display: flex; align-items: baseline; gap: 16px; }
+  .meta { font: var(--type-micro); color: var(--hl-faint); font-weight: 400; white-space: nowrap; }
+  .hero { font: var(--type-hero); font-size: 3rem; color: var(--hl-gold); text-transform: uppercase; text-shadow: var(--text-engrave-glow); line-height: 0.92; }
+  .disp { font: var(--type-display); color: var(--hl-gold); text-shadow: var(--text-engrave); }
+  .ttl { font: var(--type-title); color: var(--hl-gold); text-shadow: var(--text-engrave); }
+  .h4 { font: var(--type-h4); color: var(--hl-ink); }
+</style>
+</head>
+<body>
+  <div class="stack">
+    <div class="line"><div class="hero">Hero's</div><div class="meta">hero · clamp 3–5rem · uppercase</div></div>
+    <div class="line"><div class="disp">Malakor el Vacío</div><div class="meta">display · 2rem · boss name</div></div>
+    <div class="line"><div class="ttl">Misiones Diarias</div><div class="meta">title · 1.85rem · sections</div></div>
+    <div class="line"><div class="h4">⚔ Forja del Cuerpo</div><div class="meta">h4 · 1.55rem · card heads (ink)</div></div>
+  </div>
+</body>
+</html>

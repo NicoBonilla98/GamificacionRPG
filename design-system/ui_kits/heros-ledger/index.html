@@ -1,0 +1,242 @@
+<!-- @dsCard group="Hero's Ledger App" viewport="430x780" name="Hero's Ledger — mobile app" subtitle="Login → daily quests → boss → expedition → hero" -->
+<!-- @startingPoint section="Hero's Ledger" subtitle="Full habit-RPG mobile app: login, quests, boss, expedition, character" viewport="430x780" -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hero's Ledger — UI Kit</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg-page); background-size: var(--bg-page-size); }
+  #app { height: 100vh; overflow-y: auto; overflow-x: hidden; }
+  .toast-stack { position: fixed; left: 50%; bottom: 104px; transform: translateX(-50%); width: min(100%, 430px); padding: 0 16px; display: grid; gap: 8px; z-index: 50; pointer-events: none; }
+  #app::-webkit-scrollbar { width: 0; }
+
+  /* ===== Combat pop ===== */
+  .cp-backdrop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 18px; background: rgba(8,6,5,0.74); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); animation: cp-fade 200ms ease; }
+  .cp-card { width: min(100%, 384px); padding: 16px; border-radius: 14px; border: 1px solid rgba(242,204,69,0.32); background: var(--grad-card); box-shadow: var(--shadow-card), var(--glow-gold); }
+  .cp-stage { height: 218px; position: relative; overflow: hidden; border-radius: 10px; border: 1px solid rgba(242,204,69,0.22); background: var(--bg-stage); box-shadow: var(--shadow-well-deep); }
+  .cp-stage::after { content:""; position:absolute; left:22px; right:22px; bottom:26px; height:12px; border-radius:50%; background:rgba(0,0,0,.48); filter:blur(5px); }
+  .cp-label { position:absolute; top:10px; left:12px; font: 900 0.66rem/1 var(--font-mono); letter-spacing:.12em; text-transform:uppercase; color: var(--hl-faint); z-index:3; }
+  .cp-sprite { position:absolute; bottom:36px; image-rendering:pixelated; z-index:2; filter: drop-shadow(0 12px 0 rgba(0,0,0,.24)); }
+  .cp-hero { left: 28px; width: 116px; height: 116px; }
+  .cp-monster { right: 24px; width: 132px; height: 132px; }
+  .cp-aura, .cp-slash, .cp-burst { position:absolute; pointer-events:none; opacity:0; }
+  .cp-aura { left:20px; bottom:32px; width:122px; height:122px; border-radius:50%; border:2px solid rgba(76,177,255,.68); box-shadow:0 0 20px rgba(76,177,255,.58), inset 0 0 22px rgba(76,177,255,.2); z-index:1; }
+  .cp-slash { left:142px; top:66px; width:116px; height:44px; z-index:4; border-top:8px solid rgba(244,250,255,.92); border-radius:50%; transform: rotate(-24deg) scaleX(.2); box-shadow:0 -8px 0 rgba(76,177,255,.6), 0 0 18px rgba(76,177,255,.8); }
+  .cp-burst { right:74px; top:70px; width:48px; height:48px; z-index:5; background: linear-gradient(90deg, transparent 43%, #fff 43% 57%, transparent 57%), linear-gradient(0deg, transparent 43%, #f2cc45 43% 57%, transparent 57%); transform: scale(.2) rotate(45deg); filter: drop-shadow(0 0 10px rgba(242,204,69,.85)); }
+  .cp-dmg { position:absolute; right:58px; top:24px; z-index:6; font: 950 2.1rem/1 var(--font-body); color:#fff; text-shadow:0 2px 0 #c9112c, 0 0 14px rgba(212,59,74,.85); opacity:0; }
+
+  /* support NPC familiar */
+  .cp-npc { position:absolute; left:6px; bottom:96px; z-index:2; width:46px; height:46px; border-radius:50%; display:grid; place-items:center; background:#1b1512; border:2px solid var(--npc-c,#f2cc45); color:var(--npc-c,#f2cc45); font-size:1.35rem; box-shadow:0 0 16px color-mix(in srgb, var(--npc-c,#f2cc45) 52%, transparent); filter: drop-shadow(0 7px 0 rgba(0,0,0,.22)); }
+  .cp-npc-tag { position:absolute; left:2px; bottom:68px; z-index:2; max-width:140px; padding:2px 8px; border-radius:999px; background:rgba(0,0,0,.58); color:var(--npc-c,#f2cc45); font:900 .58rem/1.3 var(--font-body); letter-spacing:.04em; text-transform:uppercase; white-space:nowrap; }
+  .cp-npc-beam { position:absolute; left:50px; bottom:112px; width:54px; height:6px; z-index:1; border-radius:999px; background:var(--npc-c,#f2cc45); opacity:0; filter: drop-shadow(0 0 8px var(--npc-c,#f2cc45)); }
+
+  .cp-stage.go .cp-hero   { animation: hero-strike 760ms steps(4,end); }
+  .cp-stage.go .cp-monster{ animation: monster-hit 760ms steps(4,end); }
+  .cp-stage.go .cp-aura   { animation: aura-flash 760ms steps(4,end); }
+  .cp-stage.go .cp-slash  { animation: slash-arc 620ms steps(5,end); }
+  .cp-stage.go .cp-burst  { animation: impact-pop 640ms steps(4,end); }
+  .cp-stage.go .cp-dmg    { animation: dmg-float 1100ms ease 360ms both; }
+  .cp-stage.go .cp-npc    { animation: npc-support 760ms steps(4,end); }
+  .cp-stage.go .cp-npc-beam { animation: npc-beam 640ms ease 100ms; }
+
+  @keyframes cp-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes hero-strike { 0%,100% { transform: translateX(0); } 28% { transform: translateX(60px); } 46% { transform: translateX(78px); } 70% { transform: translateX(20px); } }
+  @keyframes aura-flash { 0%,100% { opacity:0; transform:scale(.72); } 18%,48% { opacity:1; transform:scale(1.04); } }
+  @keyframes slash-arc { 0%,16% { opacity:0; transform: translateX(-30px) rotate(-24deg) scaleX(.2); } 38% { opacity:1; transform: translateX(28px) rotate(-18deg) scaleX(1); } 68% { opacity:.86; transform: translateX(82px) rotate(-8deg) scaleX(1.14); } 100% { opacity:0; transform: translateX(116px) rotate(-2deg) scaleX(.2); } }
+  @keyframes impact-pop { 0%,36%,100% { opacity:0; transform: scale(.2) rotate(45deg); } 50% { opacity:1; transform: scale(1.1) rotate(45deg); } 66% { opacity:.65; transform: scale(1.65) rotate(45deg); } }
+  @keyframes monster-hit { 0%,100% { transform: translateX(0); filter:none; } 44% { transform: translateX(10px); filter: brightness(1.8) saturate(.6); } 58% { transform: translateX(-10px); filter: brightness(1.5); } 72% { transform: translateX(5px); } }
+  @keyframes dmg-float { 0% { opacity:0; transform: translateY(10px) scale(.6); } 22% { opacity:1; transform: translateY(0) scale(1.18); } 70% { opacity:1; transform: translateY(-16px) scale(1); } 100% { opacity:0; transform: translateY(-46px) scale(.95); } }
+  @keyframes hl-shake { 0%,100% { transform: translate(0,0); } 20% { transform: translate(-4px,2px); } 40% { transform: translate(4px,-2px); } 60% { transform: translate(-3px,1px); } 80% { transform: translate(3px,-1px); } }
+  .shake { animation: hl-shake 440ms ease; }
+
+  @keyframes npc-support { 0%,100% { transform: translateY(0) scale(1); } 26% { transform: translateY(-12px) scale(1.1); } 52% { transform: translateY(0) scale(1); } }
+  @keyframes npc-beam { 0% { opacity:0; transform: translateX(0) scaleX(.3); } 30% { opacity:1; transform: translateX(22px) scaleX(1); } 100% { opacity:0; transform: translateX(122px) scaleX(.5); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cp-stage.go .cp-hero, .cp-stage.go .cp-monster, .cp-stage.go .cp-aura, .cp-stage.go .cp-slash, .cp-stage.go .cp-burst, .cp-stage.go .cp-npc, .cp-stage.go .cp-npc-beam, .shake { animation: none; }
+    .cp-stage.go .cp-dmg { animation: none; opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="../../_ds_bundle.js"></script>
+  <script src="./data.js"></script>
+  <script type="text/babel" src="./tweaks-panel.jsx"></script>
+  <script type="text/babel" src="./chrome.jsx"></script>
+  <script type="text/babel" src="./screens.jsx"></script>
+  <script type="text/babel">
+    const { Toast, ProgressBar, Button } = window.HeroSLedgerDesignSystem_858ec3;
+    const { useTweaks, TweaksPanel, TweakSection, TweakRadio, TweakToggle, TweakSlider } = window;
+    const D = window.HL_DATA;
+    const fmtN = (n) => new Intl.NumberFormat("es-ES").format(Math.round(n));
+
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "bossStyle": "pixel",
+      "combatPop": true,
+      "shake": true,
+      "attackDmg": 280
+    }/*EDITMODE-END*/;
+
+    /* ---- Combat pop: a pixel duel that plays on every attack ---- */
+    function CombatPop({ dmg, bossHp, maxHp, npc, onClose }) {
+      const npcObj = npc ? D.npcs.find((n) => n.attr === npc) : null;
+      const npcColor = npc ? (D.attributes.find((a) => a.id === npc) || {}).color : null;
+      React.useEffect(() => {
+        const t = setTimeout(onClose, 2500);
+        return () => clearTimeout(t);
+      }, []);
+      return (
+        <div className="cp-backdrop" onClick={onClose}>
+          <div className="cp-card" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+              <span className="hl-eyebrow" style={{ color: "var(--hl-gold)" }}>¡Ataque desatado!</span>
+              <span style={{ fontFamily: "var(--font-body)", fontWeight: 900, color: "var(--hl-rose)", fontSize: "0.8rem" }}>−{fmtN(dmg)} PV</span>
+            </div>
+            <div className="cp-stage go" style={{ "--npc-c": npcColor || "var(--hl-gold)" }}>
+              <div className="cp-label">Pixel Battle</div>
+              <span className="cp-aura"></span>
+              {npcObj ? <span className="cp-npc-beam"></span> : null}
+              {npcObj ? <div className="cp-npc">{npcObj.icon}</div> : null}
+              {npcObj ? <div className="cp-npc-tag">Apoyo · {npcObj.name}</div> : null}
+              <img className="cp-sprite cp-hero" src="../../assets/pixel-hero.svg" alt="" />
+              <span className="cp-slash"></span>
+              <span className="cp-burst"></span>
+              <img className="cp-sprite cp-monster" src="../../assets/pixel-monster.svg" alt="" />
+              <div className="cp-dmg">−{fmtN(dmg)}</div>
+            </div>
+            <div style={{ marginTop: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                <strong style={{ fontFamily: "var(--font-body)", color: "var(--hl-ink)", fontSize: "0.82rem" }}>{D.boss.name}</strong>
+                <span style={{ fontFamily: "var(--font-body)", color: "var(--hl-muted)", fontSize: "0.78rem" }}>{fmtN(bossHp)} / {fmtN(maxHp)} PV</span>
+              </div>
+              <ProgressBar kind="hp" value={bossHp} max={maxHp} />
+            </div>
+            <Button variant="primary" fullWidth onClick={onClose} style={{ marginTop: "14px" }}>
+              {bossHp <= 0 ? "🏆 ¡Victoria!" : "Continuar"}
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    function App() {
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      const [loggedIn, setLoggedIn] = React.useState(false);
+      const [view, setView] = React.useState("quests");
+      const [hero, setHero] = React.useState(D.hero);
+      const [done, setDone] = React.useState([]);
+      const [focus, setFocus] = React.useState(null);
+      const [npc, setNpc] = React.useState("FOC");
+      const [toasts, setToasts] = React.useState([]);
+      const [density, setDensity] = React.useState(() => localStorage.getItem("hl-density") || "compact");
+      const [bossHp, setBossHp] = React.useState(D.boss.hp);
+      const [combat, setCombat] = React.useState(null);
+      const [attackId, setAttackId] = React.useState(0);
+      const [shaking, setShaking] = React.useState(false);
+      const compact = density === "compact";
+      function changeDensity(d) { setDensity(d); localStorage.setItem("hl-density", d); }
+
+      function pop(text, color, icon) {
+        const id = Math.random().toString(36).slice(2);
+        setToasts((ts) => [...ts, { id, text, color, icon, show: false }]);
+        requestAnimationFrame(() => setToasts((ts) => ts.map((x) => x.id === id ? { ...x, show: true } : x)));
+        setTimeout(() => setToasts((ts) => ts.map((x) => x.id === id ? { ...x, show: false } : x)), 2600);
+        setTimeout(() => setToasts((ts) => ts.filter((x) => x.id !== id)), 2960);
+      }
+
+      function completeQuest(id) {
+        if (done.includes(id)) return;
+        const q = D.dailyQuests.find((x) => x.id === id);
+        setDone((d) => [...d, id]);
+        setHero((h) => ({ ...h, currentXp: Math.min(h.nextXp, h.currentXp + Math.round(q.xp * 1.4)), quests: h.quests + 1 }));
+        pop(`${attrLabelG(q.attr)} +${Math.max(2, Math.round(q.xp / 50))}`, colorG(q.attr), badgeG(q.attr));
+      }
+      function selectNpc(attr) { setNpc((cur) => (cur === attr ? null : attr)); }
+
+      function attack() {
+        if (bossHp <= 0) { pop("Malakor ya fue derrotado hoy.", "var(--hl-green)", "✓"); return; }
+        const dmg = Math.min(bossHp, t.attackDmg);
+        const newHp = Math.max(0, bossHp - dmg);
+        if (t.combatPop) {
+          setAttackId((n) => n + 1);
+          setCombat({ dmg });
+          if (t.shake) { setTimeout(() => setShaking(true), 420); setTimeout(() => setShaking(false), 880); }
+          setTimeout(() => setBossHp(newHp), 700);
+          if (newHp <= 0) setTimeout(() => pop("¡Malakor el Vacío derrotado!", "var(--hl-danger)", "🏆"), 1700);
+        } else {
+          setBossHp(newHp);
+          pop(`−${dmg} PV · Malakor`, "var(--hl-danger)", "⚔");
+          if (newHp <= 0) pop("¡Malakor el Vacío derrotado!", "var(--hl-danger)", "🏆");
+        }
+      }
+
+      function attrLabelG(id) { return D.attributes.find((a) => a.id === id).label; }
+      function colorG(id) { return D.attributes.find((a) => a.id === id).color; }
+      function badgeG(id) { return { STR: "💪", INT: "📘", VIT: "💚", DIS: "🎯", FOC: "🧠" }[id]; }
+
+      const panel = (
+        <TweaksPanel>
+          <TweakSection label="Boss" />
+          <TweakRadio label="Estilo del boss" value={t.bossStyle} options={["pixel", "arte"]} onChange={(v) => setTweak("bossStyle", v)} />
+          <TweakSection label="Combate" />
+          <TweakToggle label="Pop de combate al atacar" value={t.combatPop} onChange={(v) => setTweak("combatPop", v)} />
+          <TweakToggle label="Sacudida al impactar" value={t.shake} onChange={(v) => setTweak("shake", v)} />
+          <TweakSlider label="Daño por ataque" value={t.attackDmg} min={100} max={500} step={20} unit=" PV" onChange={(v) => setTweak("attackDmg", v)} />
+        </TweaksPanel>
+      );
+
+      if (!loggedIn) {
+        return (
+          <React.Fragment>
+            <div id="app">
+              <PhoneShell>
+                <LoginScreen onEnter={(name) => { setHero((h) => ({ ...h, name })); setLoggedIn(true); pop(`Bienvenido, ${name}`, "var(--hl-gold)", "⭐"); }} />
+              </PhoneShell>
+            </div>
+            {panel}
+          </React.Fragment>
+        );
+      }
+
+      return (
+        <React.Fragment>
+          <div id="app" className={shaking ? "shake" : ""}>
+            <PhoneShell>
+              <TopBar hero={hero} density={density} onDensity={changeDensity} />
+              <div style={{ paddingBottom: "104px" }}>
+                {view === "quests" && <QuestsScreen hero={hero} done={done} onComplete={completeQuest} focus={focus} onFocus={setFocus} compact={compact} />}
+                {view === "boss" && <BossScreen selectedNpc={npc} onSelectNpc={selectNpc} hero={hero} compact={compact} bossStyle={t.bossStyle} bossHp={bossHp} maxHp={D.boss.maxHp} onAttack={attack} />}
+                {view === "expedition" && <ExpeditionScreen compact={compact} />}
+                {view === "character" && <CharacterScreen hero={hero} compact={compact} />}
+              </div>
+              <TabBar active={view} onChange={setView} />
+            </PhoneShell>
+          </div>
+          {combat ? <CombatPop key={attackId} dmg={combat.dmg} bossHp={bossHp} maxHp={D.boss.maxHp} npc={npc} onClose={() => setCombat(null)} /> : null}
+          <div className="toast-stack">
+            {toasts.map((tt) => (
+              <Toast key={tt.id} color={tt.color} icon={tt.icon} show={tt.show} style={{ pointerEvents: "auto" }}>{tt.text}</Toast>
+            ))}
+          </div>
+          {panel}
+        </React.Fragment>
+      );
+    }
+
+    function boot() {
+      if (!window.PhoneShell || !window.QuestsScreen || !window.useTweaks) { setTimeout(boot, 40); return; }
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    }
+    boot();
+  </script>
+</body>
+</html>

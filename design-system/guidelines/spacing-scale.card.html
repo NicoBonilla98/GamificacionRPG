@@ -1,0 +1,24 @@
+<!-- @dsCard group="Spacing" viewport="700x180" name="Spacing scale" subtitle="4px base — the UI favours the 14–22 mid-range" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 24px; display: grid; gap: 12px; }
+  .row { display: flex; align-items: center; gap: 14px; }
+  .bar { height: 22px; background: var(--grad-gold-bar); border-radius: 4px; }
+  .lab { font: var(--type-micro); color: var(--hl-ink); font-weight: 400; text-transform: none; width: 130px; }
+  .lab b { color: var(--hl-gold); }
+</style>
+</head>
+<body>
+  <div class="row"><div class="lab"><b>2</b> · 8px</div><div class="bar" style="width:8px"></div></div>
+  <div class="row"><div class="lab"><b>4</b> · 14px <span style="color:var(--hl-faint)">card gap</span></div><div class="bar" style="width:14px"></div></div>
+  <div class="row"><div class="lab"><b>5</b> · 16px <span style="color:var(--hl-faint)">list gap</span></div><div class="bar" style="width:16px"></div></div>
+  <div class="row"><div class="lab"><b>8</b> · 22px <span style="color:var(--hl-faint)">card pad</span></div><div class="bar" style="width:22px"></div></div>
+  <div class="row"><div class="lab"><b>9</b> · 28px</div><div class="bar" style="width:28px"></div></div>
+  <div class="row"><div class="lab"><b>10</b> · 32px</div><div class="bar" style="width:32px"></div></div>
+  <div class="row"><div class="lab"><b>section</b> · 34px</div><div class="bar" style="width:34px"></div></div>
+</body>
+</html>

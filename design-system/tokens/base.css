@@ -1,0 +1,51 @@
+/* =========================================================================
+   HERO'S LEDGER — BASE / RESET
+   Sensible defaults so any page that links styles.css feels on-brand
+   immediately: dark gold-lit page, serif headings, sans body.
+   ========================================================================= */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg-page);
+  background-size: var(--bg-page-size);
+  color: var(--text-body);
+  font: var(--type-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p {
+  margin: 0;
+}
+
+/* Display headings are gold, serif, engraved. */
+h1, h2, h3, h4 {
+  font-family: var(--font-heading);
+  color: var(--text-heading);
+  text-shadow: var(--text-engrave);
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+a {
+  color: var(--hl-gold);
+}
+
+/* The signature eyebrow label: uppercase, heavy, tracked-out, muted. */
+.hl-eyebrow {
+  display: block;
+  color: var(--text-muted);
+  font: var(--type-label);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+}
+
+/* Pixel-art surfaces must never blur. */
+.hl-pixel {
+  image-rendering: pixelated;
+}

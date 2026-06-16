@@ -1,0 +1,55 @@
+/* =========================================================================
+   HERO'S LEDGER — EFFECTS: SHADOWS, GLOWS, GRADIENTS & TEXTURES
+   The world is lit by a single gold light from the top. Wells are deep,
+   panels are softly inset, the metal glows. Pixel surfaces are crisp.
+   ========================================================================= */
+:root {
+  /* ---- Outer shadows ---- */
+  --shadow-card: 0 18px 45px rgba(0, 0, 0, 0.3);
+  --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.5);          /* toasts, floating */
+  --shadow-shell: 0 0 80px rgba(0, 0, 0, 0.65);          /* the phone shell */
+
+  /* ---- Inset shadows ---- */
+  --shadow-well: inset 0 1px 4px rgba(0, 0, 0, 0.8);     /* progress tracks, inputs */
+  --shadow-well-deep: inset 0 0 36px rgba(0, 0, 0, 0.62); /* battle stage */
+  --shadow-icon-well: inset 0 0 10px rgba(0, 0, 0, 0.7);  /* quest/battle icon tiles */
+  --shadow-panel-edge: inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+
+  /* ---- Gold glows (the signature) ---- */
+  --glow-gold-sm: 0 0 24px rgba(242, 204, 69, 0.12);
+  --glow-gold: 0 0 30px rgba(242, 204, 69, 0.16);
+  --glow-button: inset 0 2px 0 rgba(255, 255, 255, 0.45), 0 10px 30px rgba(242, 204, 69, 0.18); /* @kind shadow */
+
+  /* ---- Gradients ---- */
+  --grad-gold-button: linear-gradient(180deg, #f5d752, #d5a911); /* @kind color */   /* primary CTA face */
+  --grad-gold-bar: linear-gradient(90deg, #b99411, #ffe172); /* @kind color */       /* XP / progress fill */
+  --grad-hp-bar: linear-gradient(90deg, #ffaaa4, #c9112c); /* @kind color */         /* boss & hero HP */
+  --grad-vit-bar: linear-gradient(90deg, #7ecb8e, #f2cc45); /* @kind color */        /* attribute / timer fill */
+  --grad-card: linear-gradient(145deg, rgba(58, 50, 46, 0.92), rgba(27, 20, 18, 0.94)); /* @kind color */
+  --grad-topbar: linear-gradient(180deg, rgba(59, 50, 45, 0.96), rgba(27, 20, 18, 0.96)); /* @kind color */
+
+  /* ---- Page atmosphere: a gold sun overhead + faint engraved grid ---- */
+  --bg-page:
+    radial-gradient(circle at 50% 0%, rgba(242, 204, 69, 0.12), transparent 34rem),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    #0f0b09;
+  --bg-page-size: auto, 34px 34px, 34px 34px, auto;
+
+  /* ---- Phone shell: a subtly ribbed leather/board surface ---- */
+  --bg-shell:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035), transparent 10%, rgba(0, 0, 0, 0.2) 50%, transparent 90%, rgba(255, 255, 255, 0.03)),
+    repeating-linear-gradient(90deg, #161210 0 42px, #1c1714 42px 84px);
+
+  /* ---- Battle stage: cool CRT scanlines (the diegetic pixel screen) ---- */
+  --bg-stage:
+    linear-gradient(180deg, rgba(20, 31, 43, 0.86), rgba(8, 8, 12, 0.96)),
+    repeating-linear-gradient(0deg, transparent 0 7px, rgba(255, 255, 255, 0.025) 7px 8px),
+    repeating-linear-gradient(90deg, transparent 0 7px, rgba(255, 255, 255, 0.025) 7px 8px);
+
+  /* ---- Motion ---- */
+  --ease-bar: width 260ms ease; /* @kind other */          /* progress bars glide */
+  --ease-ui: 200ms ease; /* @kind other */                 /* hovers, toggles */
+  --ease-toast: opacity 280ms ease, transform 280ms ease; /* @kind other */
+  --steps-pixel: steps(4, end); /* @kind other */          /* pixel sprite animation cadence */
+}

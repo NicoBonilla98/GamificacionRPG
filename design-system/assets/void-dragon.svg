@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 760" role="img" aria-label="Dragon de boss">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="34%" r="55%">
+      <stop offset="0%" stop-color="#7b2b8f"></stop>
+      <stop offset="48%" stop-color="#201a28"></stop>
+      <stop offset="100%" stop-color="#09070b"></stop>
+    </radialGradient>
+    <linearGradient id="scale" x1="0" x2="1">
+      <stop offset="0" stop-color="#66717d"></stop>
+      <stop offset="0.5" stop-color="#2c2535"></stop>
+      <stop offset="1" stop-color="#100d14"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="760" fill="url(#glow)"></rect>
+  <path d="M44 612C48 444 122 302 260 188L142 100l150 40 28-110 26 110 152-40-118 88c138 114 212 256 216 424-82-91-161-136-236-136h-80c-75 0-154 45-236 136Z" fill="#15121b"></path>
+  <path d="M320 104 456 260l-70 242H254l-70-242L320 104Z" fill="url(#scale)"></path>
+  <path d="M226 300 320 132l94 168-38 150H264l-38-150Z" fill="#3a3444"></path>
+  <path d="M236 310 96 230l150 146-82 40 110 26-36-132Zm168 0 140-80-150 146 82 40-110 26 38-132Z" fill="#211a28"></path>
+  <path d="M265 394h110l-55 138-55-138Z" fill="#100c12"></path>
+  <path d="M246 348c34-26 60-26 78 0-30 10-56 10-78 0Zm70 0c18-26 44-26 78 0-22 10-48 10-78 0Z" fill="#ff46d5"></path>
+  <path d="M192 558c66 36 109 54 128 54s62-18 128-54c-42 82-84 123-128 123s-86-41-128-123Z" fill="#09070a"></path>
+  <path d="M242 590h156l-78 58-78-58Z" fill="#f0d7ce" opacity=".82"></path>
+  <g fill="#f2a133" opacity=".82">
+    <rect x="94" y="312" width="7" height="34" rx="3" transform="rotate(-28 94 312)"></rect>
+    <rect x="528" y="356" width="7" height="34" rx="3" transform="rotate(28 528 356)"></rect>
+    <rect x="118" y="482" width="6" height="28" rx="3" transform="rotate(22 118 482)"></rect>
+    <rect x="500" y="506" width="6" height="28" rx="3" transform="rotate(-20 500 506)"></rect>
+  </g>
+</svg>

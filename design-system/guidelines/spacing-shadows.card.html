@@ -1,0 +1,21 @@
+<!-- @dsCard group="Spacing" viewport="700x180" name="Shadows, glows & wells" subtitle="One overhead gold light: raised cards, deep wells, glowing metal" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 26px; display: flex; gap: 20px; align-items: center; }
+  .col { flex: 1; text-align: center; }
+  .box { height: 72px; border-radius: 10px; display: grid; place-items: center; font: var(--type-micro); color: var(--hl-muted); font-weight: 400; text-transform: none; }
+  .nm { margin-top: 10px; font: var(--type-micro); color: var(--hl-muted); font-weight: 400; text-transform: none; }
+  .nm b { color: var(--hl-ink); }
+</style>
+</head>
+<body>
+  <div class="col"><div class="box" style="background:var(--grad-card);box-shadow:var(--shadow-card)">card</div><div class="nm"><b>shadow-card</b><br>0 18 45 / .3</div></div>
+  <div class="col"><div class="box" style="background:var(--hl-ink-well);box-shadow:var(--shadow-well)">well</div><div class="nm"><b>shadow-well</b><br>inset deep</div></div>
+  <div class="col"><div class="box" style="background:var(--hl-gold);box-shadow:var(--glow-gold);color:#170f08">glow</div><div class="nm"><b>glow-gold</b><br>0 0 30 gold</div></div>
+  <div class="col"><div class="box" style="background:var(--grad-gold-button);box-shadow:var(--glow-button);color:#170f08">button</div><div class="nm"><b>glow-button</b><br>top sheen + glow</div></div>
+</body>
+</html>

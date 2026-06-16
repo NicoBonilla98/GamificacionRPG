@@ -1,0 +1,26 @@
+<!-- @dsCard group="Colors" viewport="700x180" name="Attribute hues" subtitle="One color per stat — carried across quests, NPCs, meters, pops" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 22px; }
+  .row { display: flex; gap: 12px; }
+  .sw { flex: 1; padding: 14px; border-radius: 10px; background: rgba(0,0,0,0.24); border: 1px solid var(--border-panel); border-left: 3px solid var(--c); }
+  .dot { width: 30px; height: 30px; border-radius: 8px; background: var(--c); }
+  .id { margin-top: 10px; font: var(--type-pill); color: var(--c); }
+  .nm { font: var(--type-micro); color: var(--hl-muted); font-weight: 400; text-transform: none; }
+  .vl { font: var(--type-micro); color: var(--hl-faint); font-weight: 400; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw" style="--c:var(--hl-attr-str)"><div class="dot"></div><div class="id">STR</div><div class="nm">Fuerza</div><div class="vl">#D43B4A</div></div>
+    <div class="sw" style="--c:var(--hl-attr-int)"><div class="dot"></div><div class="id">INT</div><div class="nm">Inteligencia</div><div class="vl">#4CB1FF</div></div>
+    <div class="sw" style="--c:var(--hl-attr-vit)"><div class="dot"></div><div class="id">VIT</div><div class="nm">Vitalidad</div><div class="vl">#7ECB8E</div></div>
+    <div class="sw" style="--c:var(--hl-attr-dis)"><div class="dot"></div><div class="id">DIS</div><div class="nm">Disciplina</div><div class="vl">#F2CC45</div></div>
+    <div class="sw" style="--c:var(--hl-attr-foc)"><div class="dot"></div><div class="id">FOC</div><div class="nm">Foco</div><div class="vl">#B18BFF</div></div>
+  </div>
+</body>
+</html>

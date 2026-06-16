@@ -1,0 +1,402 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "components/core/**",
+              "components/feedback/**",
+              "components/forms/**",
+              "ui_kits/heros-ledger/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='AttributeMeter'] > JSXAttribute > JSXIdentifier[name!=/^(?:attr|value|max|bonus|next|key|ref|className|style|children)$/]",
+        "message": "<AttributeMeter> doesn't accept that prop. Declared props: attr, value, max, bonus, next."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='AttributeMeter'] > JSXAttribute[name.name='attr'] > Literal[value!=/^(?:STR|INT|VIT|DIS|FOC)$/]",
+        "message": "<AttributeMeter> attr must be one of 'STR' | 'INT' | 'VIT' | 'DIS' | 'FOC'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute > JSXIdentifier[name!=/^(?:variant|size|disabled|icon|fullWidth|children|key|ref|className|style|children)$/]",
+        "message": "<Button> doesn't accept that prop. Declared props: variant, size, disabled, icon, fullWidth, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='variant'] > Literal[value!=/^(?:primary|complete|mini|ghost|danger)$/]",
+        "message": "<Button> variant must be one of 'primary' | 'complete' | 'mini' | 'ghost' | 'danger'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:sm|md|lg)$/]",
+        "message": "<Button> size must be one of 'sm' | 'md' | 'lg'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Card'] > JSXAttribute > JSXIdentifier[name!=/^(?:accent|tone|active|faded|as|children|key|ref|className|style|children)$/]",
+        "message": "<Card> doesn't accept that prop. Declared props: accent, tone, active, faded, as, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Card'] > JSXAttribute[name.name='tone'] > Literal[value!=/^(?:card|panel|well)$/]",
+        "message": "<Card> tone must be one of 'card' | 'panel' | 'well'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Input'] > JSXAttribute > JSXIdentifier[name!=/^(?:label|hint|key|ref|className|style|children)$/]",
+        "message": "<Input> doesn't accept that prop. Declared props: label, hint."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Pill'] > JSXAttribute > JSXIdentifier[name!=/^(?:tone|icon|children|key|ref|className|style|children)$/]",
+        "message": "<Pill> doesn't accept that prop. Declared props: tone, icon, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Pill'] > JSXAttribute[name.name='tone'] > Literal[value!=/^(?:neutral|gold|green|violet|danger)$/]",
+        "message": "<Pill> tone must be one of 'neutral' | 'gold' | 'green' | 'violet' | 'danger'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ProgressBar'] > JSXAttribute > JSXIdentifier[name!=/^(?:value|max|kind|color|height|label|key|ref|className|style|children)$/]",
+        "message": "<ProgressBar> doesn't accept that prop. Declared props: value, max, kind, color, height, label."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ProgressBar'] > JSXAttribute[name.name='kind'] > Literal[value!=/^(?:xp|hp|attr|timer)$/]",
+        "message": "<ProgressBar> kind must be one of 'xp' | 'hp' | 'attr' | 'timer'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='RarityTag'] > JSXAttribute > JSXIdentifier[name!=/^(?:rarity|key|ref|className|style|children)$/]",
+        "message": "<RarityTag> doesn't accept that prop. Declared props: rarity."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='RarityTag'] > JSXAttribute[name.name='rarity'] > Literal[value!=/^(?:common|rare|epic)$/]",
+        "message": "<RarityTag> rarity must be one of 'common' | 'rare' | 'epic'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Toast'] > JSXAttribute > JSXIdentifier[name!=/^(?:color|icon|show|children|key|ref|className|style|children)$/]",
+        "message": "<Toast> doesn't accept that prop. Declared props: color, icon, show, children."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {
+      "AttributeMeter": {
+        "replaces": []
+      },
+      "Button": {
+        "replaces": []
+      },
+      "Card": {
+        "replaces": []
+      },
+      "Input": {
+        "replaces": []
+      },
+      "Pill": {
+        "replaces": []
+      },
+      "ProgressBar": {
+        "replaces": []
+      },
+      "RarityTag": {
+        "replaces": []
+      },
+      "Toast": {
+        "replaces": []
+      }
+    },
+    "tokens": [
+      "--accent",
+      "--accent-deep",
+      "--bg-page",
+      "--bg-page-size",
+      "--bg-shell",
+      "--bg-stage",
+      "--border-gold",
+      "--border-hairline",
+      "--border-mark",
+      "--border-med",
+      "--border-panel",
+      "--border-thin",
+      "--control-lg",
+      "--control-md",
+      "--control-mini",
+      "--control-sm",
+      "--ease-bar",
+      "--ease-toast",
+      "--ease-ui",
+      "--font-body",
+      "--font-heading",
+      "--font-label",
+      "--font-mono",
+      "--gap-inline",
+      "--gap-list",
+      "--glow-button",
+      "--glow-gold",
+      "--glow-gold-sm",
+      "--grad-card",
+      "--grad-gold-bar",
+      "--grad-gold-button",
+      "--grad-hp-bar",
+      "--grad-topbar",
+      "--grad-vit-bar",
+      "--hit-min",
+      "--hl-attr-dis",
+      "--hl-attr-foc",
+      "--hl-attr-int",
+      "--hl-attr-str",
+      "--hl-attr-vit",
+      "--hl-bg",
+      "--hl-bg-deep",
+      "--hl-danger",
+      "--hl-faint",
+      "--hl-font-display",
+      "--hl-font-mono",
+      "--hl-font-ui",
+      "--hl-gold",
+      "--hl-gold-bright",
+      "--hl-gold-deep",
+      "--hl-gold-edge",
+      "--hl-green",
+      "--hl-ink",
+      "--hl-ink-well",
+      "--hl-line",
+      "--hl-muted",
+      "--hl-panel",
+      "--hl-panel-soft",
+      "--hl-rarity-common",
+      "--hl-rarity-epic",
+      "--hl-rarity-rare",
+      "--hl-rose",
+      "--pad-card",
+      "--pad-input",
+      "--pad-panel",
+      "--radius-circle",
+      "--radius-lg",
+      "--radius-md",
+      "--radius-pill",
+      "--radius-sm",
+      "--radius-xl",
+      "--radius-xs",
+      "--section-gap",
+      "--shadow-card",
+      "--shadow-icon-well",
+      "--shadow-panel-edge",
+      "--shadow-pop",
+      "--shadow-shell",
+      "--shadow-well",
+      "--shadow-well-deep",
+      "--shell-width",
+      "--space-1",
+      "--space-10",
+      "--space-12",
+      "--space-16",
+      "--space-2",
+      "--space-3",
+      "--space-4",
+      "--space-5",
+      "--space-6",
+      "--space-7",
+      "--space-8",
+      "--space-9",
+      "--steps-pixel",
+      "--surface-app",
+      "--surface-card",
+      "--surface-page",
+      "--surface-panel",
+      "--surface-raised",
+      "--surface-well",
+      "--tabbar-height",
+      "--text-body",
+      "--text-engrave",
+      "--text-engrave-glow",
+      "--text-heading",
+      "--text-muted",
+      "--text-on-gold",
+      "--topbar-height",
+      "--track-boss",
+      "--track-button",
+      "--track-hp",
+      "--track-label",
+      "--track-md",
+      "--track-thin",
+      "--type-body",
+      "--type-body-sm",
+      "--type-button",
+      "--type-display",
+      "--type-h4",
+      "--type-hero",
+      "--type-label",
+      "--type-micro",
+      "--type-pill",
+      "--type-title",
+      "--type-topbar",
+      "--weight-body",
+      "--weight-button",
+      "--weight-label",
+      "--weight-strong"
+    ],
+    "tokenKinds": {
+      "--hl-bg-deep": "color",
+      "--hl-bg": "color",
+      "--hl-panel": "color",
+      "--hl-panel-soft": "color",
+      "--hl-ink-well": "color",
+      "--hl-line": "color",
+      "--hl-gold": "color",
+      "--hl-gold-bright": "color",
+      "--hl-gold-deep": "color",
+      "--hl-gold-edge": "color",
+      "--hl-ink": "color",
+      "--hl-muted": "color",
+      "--hl-faint": "color",
+      "--hl-danger": "color",
+      "--hl-rose": "color",
+      "--hl-green": "color",
+      "--hl-attr-str": "color",
+      "--hl-attr-int": "color",
+      "--hl-attr-vit": "color",
+      "--hl-attr-dis": "color",
+      "--hl-attr-foc": "color",
+      "--hl-rarity-common": "color",
+      "--hl-rarity-rare": "color",
+      "--hl-rarity-epic": "color",
+      "--surface-page": "color",
+      "--surface-app": "color",
+      "--surface-card": "color",
+      "--surface-panel": "color",
+      "--surface-well": "color",
+      "--surface-raised": "color",
+      "--border-hairline": "color",
+      "--border-panel": "color",
+      "--border-gold": "color",
+      "--text-heading": "font",
+      "--text-body": "font",
+      "--text-muted": "font",
+      "--text-on-gold": "font",
+      "--accent": "color",
+      "--accent-deep": "color",
+      "--hl-font-display": "font",
+      "--hl-font-ui": "font",
+      "--hl-font-mono": "font",
+      "--font-heading": "font",
+      "--font-body": "font",
+      "--font-label": "font",
+      "--font-mono": "font",
+      "--type-hero": "font",
+      "--type-display": "font",
+      "--type-title": "font",
+      "--type-h4": "font",
+      "--type-topbar": "font",
+      "--type-body": "font",
+      "--type-body-sm": "font",
+      "--type-button": "font",
+      "--type-label": "font",
+      "--type-pill": "font",
+      "--type-micro": "font",
+      "--weight-body": "font",
+      "--weight-strong": "font",
+      "--weight-label": "font",
+      "--weight-button": "font",
+      "--track-label": "spacing",
+      "--track-button": "spacing",
+      "--track-boss": "spacing",
+      "--text-engrave": "font",
+      "--text-engrave-glow": "font",
+      "--space-1": "spacing",
+      "--space-2": "spacing",
+      "--space-3": "spacing",
+      "--space-4": "spacing",
+      "--space-5": "spacing",
+      "--space-6": "spacing",
+      "--space-7": "spacing",
+      "--space-8": "spacing",
+      "--space-9": "spacing",
+      "--space-10": "spacing",
+      "--space-12": "spacing",
+      "--space-16": "spacing",
+      "--pad-card": "spacing",
+      "--pad-panel": "spacing",
+      "--pad-input": "spacing",
+      "--gap-list": "spacing",
+      "--gap-inline": "spacing",
+      "--section-gap": "spacing",
+      "--radius-xs": "radius",
+      "--radius-sm": "radius",
+      "--radius-md": "radius",
+      "--radius-lg": "radius",
+      "--radius-xl": "radius",
+      "--radius-pill": "radius",
+      "--radius-circle": "radius",
+      "--border-thin": "spacing",
+      "--border-med": "spacing",
+      "--border-mark": "spacing",
+      "--hit-min": "spacing",
+      "--control-mini": "spacing",
+      "--control-sm": "spacing",
+      "--control-md": "spacing",
+      "--control-lg": "spacing",
+      "--shell-width": "spacing",
+      "--topbar-height": "spacing",
+      "--tabbar-height": "spacing",
+      "--track-thin": "spacing",
+      "--track-md": "spacing",
+      "--track-hp": "spacing",
+      "--shadow-card": "shadow",
+      "--shadow-pop": "shadow",
+      "--shadow-shell": "shadow",
+      "--shadow-well": "shadow",
+      "--shadow-well-deep": "shadow",
+      "--shadow-icon-well": "shadow",
+      "--shadow-panel-edge": "shadow",
+      "--glow-gold-sm": "shadow",
+      "--glow-gold": "shadow",
+      "--glow-button": "shadow",
+      "--grad-gold-button": "color",
+      "--grad-gold-bar": "color",
+      "--grad-hp-bar": "color",
+      "--grad-vit-bar": "color",
+      "--grad-card": "color",
+      "--grad-topbar": "color",
+      "--bg-page": "color",
+      "--bg-page-size": "color",
+      "--bg-shell": "color",
+      "--bg-stage": "color",
+      "--ease-bar": "other",
+      "--ease-ui": "other",
+      "--ease-toast": "other",
+      "--steps-pixel": "other"
+    },
+    "fontFamilies": []
+  }
+}

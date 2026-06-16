@@ -1,0 +1,64 @@
+/* =========================================================================
+   HERO'S LEDGER — COLOR TOKENS
+   Dark-fantasy "ledger / grimoire" palette: gold leaf on near-black brown.
+   Base values first, then semantic aliases.
+   ========================================================================= */
+:root {
+  color-scheme: dark;
+
+  /* ---- Surfaces (warm near-black browns, like aged parchment in shadow) ---- */
+  --hl-bg-deep: #0f0b09;        /* deepest page base */
+  --hl-bg: #15100d;             /* app background */
+  --hl-panel: #2a2421;          /* raised panel */
+  --hl-panel-soft: #352d29;     /* softer panel / hover */
+  --hl-ink-well: #120d0b;       /* recessed wells, inputs, tracks */
+  --hl-line: #4a3f39;           /* hairline borders */
+
+  /* ---- Gold (the hero metal — accents, headings, highlights) ---- */
+  --hl-gold: #f2cc45;           /* primary gold */
+  --hl-gold-bright: #ffe172;    /* highlight / progress tip */
+  --hl-gold-deep: #a88919;      /* pressed / small-label gold */
+  --hl-gold-edge: #4c3511;      /* engraved text-shadow under gold type */
+
+  /* ---- Ink (text on dark) ---- */
+  --hl-ink: #fff6ed;            /* primary warm white */
+  --hl-muted: #c4b8b0;          /* secondary / supporting copy */
+  --hl-faint: rgba(255, 246, 237, 0.45); /* tertiary, watermark labels */
+
+  /* ---- Status ---- */
+  --hl-danger: #d43b4a;         /* defeat, boss HP, errors */
+  --hl-rose: #ffb3ad;           /* warning copy, rest state */
+  --hl-green: #7ecb8e;          /* success, timers, healing */
+
+  /* ---- Attribute system (one hue per stat — used across the whole app) ---- */
+  --hl-attr-str: #d43b4a;       /* STR · Fuerza · red */
+  --hl-attr-int: #4cb1ff;       /* INT · Inteligencia · blue */
+  --hl-attr-vit: #7ecb8e;       /* VIT · Vitalidad · green */
+  --hl-attr-dis: #f2cc45;       /* DIS · Disciplina · gold */
+  --hl-attr-foc: #b18bff;       /* FOC · Foco · violet */
+
+  /* ---- Rarity (loot tiers) ---- */
+  --hl-rarity-common: var(--hl-muted);
+  --hl-rarity-rare: #4cb1ff;    /* matches INT blue */
+  --hl-rarity-epic: #b18bff;    /* matches FOC violet */
+
+  /* ============================ SEMANTIC ALIASES ============================ */
+  --surface-page: var(--hl-bg-deep);
+  --surface-app: var(--hl-bg);
+  --surface-card: linear-gradient(145deg, rgba(58, 50, 46, 0.92), rgba(27, 20, 18, 0.94));
+  --surface-panel: rgba(20, 15, 13, 0.52);
+  --surface-well: var(--hl-ink-well);
+  --surface-raised: var(--hl-panel);
+
+  --border-hairline: rgba(255, 255, 255, 0.1);
+  --border-panel: rgba(255, 255, 255, 0.08);
+  --border-gold: rgba(242, 204, 69, 0.42);
+
+  --text-heading: var(--hl-gold);
+  --text-body: var(--hl-ink);
+  --text-muted: var(--hl-muted);
+  --text-on-gold: #170f08;      /* dark ink on a gold button */
+
+  --accent: var(--hl-gold);
+  --accent-deep: var(--hl-gold-deep);
+}

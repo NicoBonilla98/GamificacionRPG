@@ -1,0 +1,59 @@
+/* =========================================================================
+   HERO'S LEDGER — SPACING, RADII & SIZING TOKENS
+   The interface is touch-first (430px phone shell). Generous padding,
+   chunky 44px+ hit targets, pill-rounded tracks.
+   ========================================================================= */
+:root {
+  /* ---- Spacing scale (4px base; the app favours the 14–22 mid-range) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 14px;
+  --space-5: 16px;
+  --space-6: 18px;
+  --space-7: 20px;
+  --space-8: 22px;
+  --space-9: 28px;
+  --space-10: 32px;
+  --space-12: 40px;
+  --space-16: 54px;
+
+  /* ---- Common semantic gaps ---- */
+  --pad-card: 22px;          /* quest / battle / panel cards */
+  --pad-panel: 22px;
+  --pad-input: 0 22px;
+  --gap-list: 16px;          /* vertical rhythm between list cards */
+  --gap-inline: 8px;         /* chips, pills, reward tags */
+  --section-gap: 34px;       /* space above a section heading */
+
+  /* ---- Corner radii ---- */
+  --radius-xs: 5px;          /* reward tags */
+  --radius-sm: 8px;          /* mini buttons, inner wells */
+  --radius-md: 10px;         /* cards, primary buttons */
+  --radius-lg: 12px;         /* tab buttons */
+  --radius-xl: 14px;         /* tabbar sheet */
+  --radius-pill: 999px;      /* progress tracks, chips */
+  --radius-circle: 50%;      /* avatars, brand mark */
+
+  /* ---- Border widths ---- */
+  --border-thin: 1px;
+  --border-med: 2px;
+  --border-mark: 3px;        /* brand-mark ring, attribute left-rail */
+
+  /* ---- Touch targets & control heights ---- */
+  --hit-min: 44px;           /* minimum tappable target */
+  --control-mini: 38px;      /* mini / timer buttons */
+  --control-sm: 48px;        /* tabs, char-tabs */
+  --control-md: 66px;        /* inputs, nav tabs */
+  --control-lg: 70px;        /* primary CTA */
+
+  /* ---- Layout ---- */
+  --shell-width: 430px;      /* phone shell max width */
+  --topbar-height: 78px;
+  --tabbar-height: 90px;
+
+  /* ---- Track heights ---- */
+  --track-thin: 10px;        /* attribute meters, timers */
+  --track-md: 16px;          /* XP / progress */
+  --track-hp: 20px;          /* boss & hero HP */
+}

@@ -1,23 +1,27 @@
-# Hero's Ledger — App UI Kit
+# Hero's Ledger
 
-A high-fidelity, click-through recreation of the Hero's Ledger mobile app, composed from the design system's component primitives.
+App móvil tipo RPG donde completas hábitos reales para desarrollar tu personaje.
+Las mecánicas están definidas en [`heros_ledger_especificaciones_extraido.txt`](heros_ledger_especificaciones_extraido.txt).
 
-## Run it
-Open `index.html`. It loads the design-system bundle (`../../_ds_bundle.js`), the brand stylesheet, and three local scripts:
+## Estructura del repositorio
 
-- `data.js` — the product's real content (quest repository sample, the Valdris arc with all four chapters, the generic boss Malakor, the five basic NPCs, equipment, passives) lifted from the source `app.js`. Plain `window.HL_DATA`.
-- `chrome.jsx` — shared shell: `PhoneShell` (430px ribbed board), `TopBar`, `TabBar`, `SectionHeading`, `LoginScreen`.
-- `screens.jsx` — the four app views: `QuestsScreen`, `BossScreen`, `ExpeditionScreen`, `CharacterScreen`.
+| Ruta | Qué es |
+|------|--------|
+| `index.html`, `app.js`, `styles.css` | **App funcional (motor).** Implementación en HTML/CSS/JS vanilla con la lógica real: quests, rachas, combate, expediciones, pasivas, persistencia en `localStorage`. Abre `index.html` directamente. |
+| `design-system/` | **Design system + prototipo de UI** exportado desde Claude Designer. Tokens de marca, componentes y una recreación high-fidelity click-through de la app. |
+| `assets/` | Sprites y marcas SVG compartidos. |
 
-## What's interactive
-- **Login → app.** Enter a hero name to cross from the vault into the app; a welcome toast fires.
-- **Quests.** Complete daily quests → the card dims, XP advances, and an attribute pop-toast fires in that stat's hue. Toggle the day's **focus** attribute.
-- **Boss.** Pick a support **NPC** (the chosen card rings green); read INT-gated boss intel; see per-mission damage.
-- **Expedition.** The Valdris arc: rotation list, four chapters with progress/keys/locks/narrative beats, and the relic reward.
-- **Character.** Status, the five attribute meters, equipment with rarity, and unlocked passives.
+## Correr la app funcional
+Abre [`index.html`](index.html) en el navegador (o sirve la carpeta con `python -m http.server 4178`).
 
-## Screens covered
-Login · Quests (rank panel, streak, focus, daily missions) · Boss (prep: key art, intel, NPC roster, combat missions, attack CTAs) · Expedition (active arc, rotation, chapter map, relic) · Character (status, attributes, equipment, passives).
+## Ver el prototipo de diseño
+Abre [`design-system/ui_kits/heros-ledger/index.html`](design-system/ui_kits/heros-ledger/index.html).
+Es una recreación cosmética sobre los componentes del design system (React + Babel) —
+la matemática de combate, decaimiento de racha y persistencia están simplificadas;
+el contenido sale de `design-system/ui_kits/heros-ledger/data.js`.
 
-## Fidelity notes
-This is a cosmetic recreation, not the real engine — combat math, streak decay, cooldowns and persistence are simplified or static. Values come straight from `data.js`. The kit reuses the published `Button`, `Pill`, `ProgressBar`, `Card`, `AttributeMeter`, `RarityTag`, `Input` and `Toast` components rather than re-implementing them; product-specific composites (top bar, boss stage, chapter card) live in the JSX files here.
+> El prototipo usa rutas relativas a la raíz del design system (`../../styles.css`,
+> `../../_ds_bundle.js`), por eso se conserva la estructura de carpetas original.
+
+## Repo
+https://github.com/NicoBonilla98/GamificacionRPG
