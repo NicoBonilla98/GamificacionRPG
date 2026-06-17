@@ -3,108 +3,123 @@
    Stack: HTML + CSS + JavaScript vanilla. Persistencia en localStorage.
    ========================================================================= */
 
-const STORAGE_KEY = "heros-ledger-v2";
+const STORAGE_KEY = "heros-ledger-v3";
 
 /* ---------------------------------------------------------------------------
-   1. ATRIBUTOS  (STR rojo, INT azul, VIT verde, DIS amarillo, FOC púrpura)
+   1. ATRIBUTOS  (STR rojo, INT azul, VIT verde, DIS amarillo, SOC naranja)
 --------------------------------------------------------------------------- */
 const ATTRIBUTES = [
   { id: "STR", label: "Fuerza", color: "#d43b4a" },
   { id: "INT", label: "Inteligencia", color: "#4cb1ff" },
   { id: "VIT", label: "Vitalidad", color: "#7ecb8e" },
   { id: "DIS", label: "Disciplina", color: "#f2cc45" },
-  { id: "FOC", label: "Foco", color: "#b18bff" },
+  { id: "SOC", label: "Sociabilidad", color: "#e8923a" },
 ];
 const ATTR_IDS = ATTRIBUTES.map((a) => a.id);
 const baseAttributes = () => Object.fromEntries(ATTR_IDS.map((id) => [id, 0]));
 const attrInfo = (id) => ATTRIBUTES.find((a) => a.id === id);
 
 /* ---------------------------------------------------------------------------
-   1.2 REPOSITORIO DE QUESTS — mínimo 6 por atributo para que el enfriamiento
-   de 3 días funcione. XP define también el daño al boss.
+   5. REPOSITORIO DE QUESTS — 40 misiones (8 por atributo: 2 fácil, 2 media,
+   2 difícil, 2 expedición). XP por dificultad = daño al boss.
+   Fácil 10 · Media 20 · Difícil 50 · Expedición 100.
 --------------------------------------------------------------------------- */
+const DIFFICULTY_XP = { facil: 10, media: 20, dificil: 50, expedicion: 100 };
+const DIFFICULTY_LABEL = { facil: "Fácil", media: "Media", dificil: "Difícil", expedicion: "Expedición" };
+
 const QUEST_REPO = [
-  // STR
-  { id: "str1", attr: "STR", name: "Forja del Cuerpo", habit: "30 min de entrenamiento de fuerza.", xp: 250, icon: "⚔" },
-  { id: "str2", attr: "STR", name: "Marcha del Guerrero", habit: "Camina o corre 5 km.", xp: 200, icon: "🥾" },
-  { id: "str3", attr: "STR", name: "Carga Pesada", habit: "Sesión de pesas o flexiones.", xp: 220, icon: "🏋" },
-  { id: "str4", attr: "STR", name: "Aliento de Hierro", habit: "Haz 50 sentadillas.", xp: 150, icon: "🦵" },
-  { id: "str5", attr: "STR", name: "Senda del Atleta", habit: "Practica un deporte 45 min.", xp: 230, icon: "⚽" },
-  { id: "str6", attr: "STR", name: "Despertar Físico", habit: "15 min de estiramiento matutino.", xp: 120, icon: "🤸" },
-  // INT
-  { id: "int1", attr: "INT", name: "Estudio del Grimorio", habit: "Lee o estudia 25 min.", xp: 200, icon: "📖" },
-  { id: "int2", attr: "INT", name: "Códice Arcano", habit: "Completa una lección de un curso.", xp: 220, icon: "🎓" },
-  { id: "int3", attr: "INT", name: "Lengua Antigua", habit: "Practica un idioma 20 min.", xp: 180, icon: "🗣" },
-  { id: "int4", attr: "INT", name: "Cálculo Rúnico", habit: "Resuelve ejercicios o problemas.", xp: 190, icon: "🔢" },
-  { id: "int5", attr: "INT", name: "Crónica del Sabio", habit: "Escribe un resumen de lo aprendido.", xp: 170, icon: "✍" },
-  { id: "int6", attr: "INT", name: "Mente Curiosa", habit: "Mira un documental o charla.", xp: 140, icon: "🔭" },
-  // VIT
-  { id: "vit1", attr: "VIT", name: "Banquete del Héroe", habit: "Cocina una comida saludable.", xp: 150, icon: "🍲" },
-  { id: "vit2", attr: "VIT", name: "Pozo de Vida", habit: "Bebe 2 litros de agua.", xp: 120, icon: "💧" },
-  { id: "vit3", attr: "VIT", name: "Descanso Sagrado", habit: "Duerme 7-8 horas.", xp: 200, icon: "🌙" },
-  { id: "vit4", attr: "VIT", name: "Aire Puro", habit: "20 min al aire libre.", xp: 130, icon: "🌳" },
-  { id: "vit5", attr: "VIT", name: "Ritual de Limpieza", habit: "Ordena tu espacio.", xp: 140, icon: "🧹" },
-  { id: "vit6", attr: "VIT", name: "Cuerpo Templado", habit: "Un día sin azúcar procesada.", xp: 160, icon: "🥗" },
-  // DIS
-  { id: "dis1", attr: "DIS", name: "Voto del Alba", habit: "Levántate temprano.", xp: 180, icon: "🌅" },
-  { id: "dis2", attr: "DIS", name: "Sin Distracciones", habit: "1 hora sin redes sociales.", xp: 190, icon: "🚫" },
-  { id: "dis3", attr: "DIS", name: "Tarea Pendiente", habit: "Completa la tarea que evitas.", xp: 230, icon: "✅" },
-  { id: "dis4", attr: "DIS", name: "Orden del Día", habit: "Planea tu día por la mañana.", xp: 140, icon: "🗓" },
-  { id: "dis5", attr: "DIS", name: "Promesa Cumplida", habit: "Termina algo que empezaste.", xp: 210, icon: "🎯" },
-  { id: "dis6", attr: "DIS", name: "Ayuno Digital", habit: "2 horas sin teléfono.", xp: 200, icon: "📵" },
-  // FOC
-  { id: "foc1", attr: "FOC", name: "Meditación Silenciosa", habit: "10 min de respiración sin pantalla.", xp: 150, icon: "🧘" },
-  { id: "foc2", attr: "FOC", name: "Trabajo Profundo", habit: "50 min sin interrupciones.", xp: 250, icon: "🎯" },
-  { id: "foc3", attr: "FOC", name: "Mente Presente", habit: "Come sin pantallas.", xp: 130, icon: "🍽" },
-  { id: "foc4", attr: "FOC", name: "Sendero Zen", habit: "Caminata consciente 15 min.", xp: 140, icon: "🚶" },
-  { id: "foc5", attr: "FOC", name: "Una Sola Cosa", habit: "Monotarea durante 30 min.", xp: 200, icon: "🎴" },
-  { id: "foc6", attr: "FOC", name: "Diario de Claridad", habit: "Journaling durante 10 min.", xp: 160, icon: "📓" },
-];
+  // STR — Fuerza (hábitos físicos)
+  { id: "str_f1", attr: "STR", diff: "facil", name: "Calienta los músculos", habit: "Haz 10 minutos de estiramiento o calentamiento.", icon: "🤸", minutes: 10 },
+  { id: "str_f2", attr: "STR", diff: "facil", name: "Sal a caminar", habit: "Camina al menos 20 minutos hoy.", icon: "🥾", minutes: 20 },
+  { id: "str_m1", attr: "STR", diff: "media", name: "Entrena con intención", habit: "Completa 30 minutos de ejercicio físico.", icon: "⚔", minutes: 30 },
+  { id: "str_m2", attr: "STR", diff: "media", name: "Sin el ascensor", habit: "Usa solo las escaleras durante todo el día.", icon: "🪜" },
+  { id: "str_d1", attr: "STR", diff: "dificil", name: "Rompe el límite", habit: "Completa una sesión de entrenamiento de 45 minutos o más.", icon: "🏋", minutes: 45 },
+  { id: "str_d2", attr: "STR", diff: "dificil", name: "El cuerpo no descansa", habit: "Haz ejercicio aunque no tengas ganas — mínimo 20 minutos.", icon: "💪", minutes: 20 },
+  { id: "str_e1", attr: "STR", diff: "expedicion", name: "La ruta del explorador", habit: "Sal a caminar o correr por una ruta que no conozcas bien.", icon: "🧭" },
+  { id: "str_e2", attr: "STR", diff: "expedicion", name: "Un día de guerrero", habit: "Completa dos sesiones físicas distintas en el mismo día.", icon: "🔥" },
+  // INT — Inteligencia (hábitos mentales)
+  { id: "int_f1", attr: "INT", diff: "facil", name: "Abre un libro", habit: "Lee al menos 10 páginas de cualquier libro.", icon: "📖" },
+  { id: "int_f2", attr: "INT", diff: "facil", name: "Aprende algo nuevo", habit: "Busca y lee sobre un tema que no conoces.", icon: "🔭" },
+  { id: "int_m1", attr: "INT", diff: "media", name: "Estudio sostenido", habit: "Dedica 30 minutos a estudiar o aprender algo con intención.", icon: "🎓", minutes: 30 },
+  { id: "int_m2", attr: "INT", diff: "media", name: "Practica el idioma", habit: "Haz una sesión de práctica de idioma extranjero.", icon: "🗣" },
+  { id: "int_d1", attr: "INT", diff: "dificil", name: "Profundiza", habit: "Lee o estudia un tema por más de una hora sin distracciones.", icon: "📚", minutes: 60 },
+  { id: "int_d2", attr: "INT", diff: "dificil", name: "Enseña lo que sabes", habit: "Explica algo que dominas a otra persona.", icon: "🧑‍🏫" },
+  { id: "int_e1", attr: "INT", diff: "expedicion", name: "El archivo del conocimiento", habit: "Lee sobre un tema durante 3 días consecutivos.", icon: "🗂" },
+  { id: "int_e2", attr: "INT", diff: "expedicion", name: "Termina lo que empezaste", habit: "Completa un curso, capítulo o módulo pendiente.", icon: "✅" },
+  // VIT — Vitalidad (hábitos de recuperación)
+  { id: "vit_f1", attr: "VIT", diff: "facil", name: "Hidrátate", habit: "Bebe al menos 2 litros de agua hoy.", icon: "💧" },
+  { id: "vit_f2", attr: "VIT", diff: "facil", name: "Duerme bien", habit: "Acuéstate antes de medianoche esta noche.", icon: "🌙" },
+  { id: "vit_m1", attr: "VIT", diff: "media", name: "Come con intención", habit: "Prepara o elige una comida balanceada hoy.", icon: "🥗" },
+  { id: "vit_m2", attr: "VIT", diff: "media", name: "Desconéctate una hora", habit: "Apaga pantallas al menos una hora antes de dormir.", icon: "📵" },
+  { id: "vit_d1", attr: "VIT", diff: "dificil", name: "Noche completa", habit: "Duerme 7 horas o más esta noche.", icon: "😴" },
+  { id: "vit_d2", attr: "VIT", diff: "dificil", name: "Un día sin excesos", habit: "Evita alcohol, comida chatarra y azúcar durante todo el día.", icon: "🍃" },
+  { id: "vit_e1", attr: "VIT", diff: "expedicion", name: "La semana del descanso", habit: "Mantén un horario de sueño consistente durante 3 días.", icon: "🛌" },
+  { id: "vit_e2", attr: "VIT", diff: "expedicion", name: "Cuida el cuerpo por dentro", habit: "Come balanceado y bebe suficiente agua durante 3 días seguidos.", icon: "🫀" },
+  // DIS — Disciplina (hábitos de consistencia)
+  { id: "dis_f1", attr: "DIS", diff: "facil", name: "La lista del día", habit: "Escribe tus 3 tareas principales antes de empezar el día.", icon: "📝" },
+  { id: "dis_f2", attr: "DIS", diff: "facil", name: "Sin postergación", habit: "Completa una tarea que llevas días evitando.", icon: "✅" },
+  { id: "dis_m1", attr: "DIS", diff: "media", name: "Mantén el ritmo", habit: "Cumple tu rutina matutina completa hoy.", icon: "🌅" },
+  { id: "dis_m2", attr: "DIS", diff: "media", name: "Termina lo que empezaste", habit: "Completa una tarea sin interrupciones hasta el final.", icon: "🎯" },
+  { id: "dis_d1", attr: "DIS", diff: "dificil", name: "Una hora sin distracciones", habit: "Trabaja o estudia 60 minutos con el teléfono fuera de la vista.", icon: "🔕", minutes: 60 },
+  { id: "dis_d2", attr: "DIS", diff: "dificil", name: "El día sin excusas", habit: "Cumple todas las tareas que te propusiste al inicio del día.", icon: "🏅" },
+  { id: "dis_e1", attr: "DIS", diff: "expedicion", name: "La semana organizada", habit: "Planifica y sigue una rutina durante 3 días consecutivos.", icon: "🗓" },
+  { id: "dis_e2", attr: "DIS", diff: "expedicion", name: "El proyecto postergado", habit: "Dedica tiempo cada día durante 3 días a algo que llevas tiempo evitando.", icon: "📦" },
+  // SOC — Sociabilidad (hábitos sociales)
+  { id: "soc_f1", attr: "SOC", diff: "facil", name: "Reconecta", habit: "Escribe o llama a alguien que no contactas hace tiempo.", icon: "📞" },
+  { id: "soc_f2", attr: "SOC", diff: "facil", name: "Preséntate", habit: "Preséntate o inicia una conversación con alguien nuevo.", icon: "👋" },
+  { id: "soc_m1", attr: "SOC", diff: "media", name: "Conversación real", habit: "Ten una conversación significativa de más de 15 minutos.", icon: "💬", minutes: 15 },
+  { id: "soc_m2", attr: "SOC", diff: "media", name: "Participa", habit: "Interviene activamente en una reunión o clase hoy.", icon: "🙋" },
+  { id: "soc_d1", attr: "SOC", diff: "dificil", name: "Habla en público", habit: "Habla frente a un grupo, aunque sea pequeño.", icon: "🎤" },
+  { id: "soc_d2", attr: "SOC", diff: "dificil", name: "Lidera la conversación", habit: "Organiza o modera una conversación grupal.", icon: "🗣" },
+  { id: "soc_e1", attr: "SOC", diff: "expedicion", name: "El vínculo sostenido", habit: "Interactúa con alguien diferente cada día durante 3 días.", icon: "🤝" },
+  { id: "soc_e2", attr: "SOC", diff: "expedicion", name: "Sal de tu zona", habit: "Asiste a un evento social o reunión fuera de tu círculo habitual.", icon: "🎉" },
+].map((q) => ({ ...q, xp: DIFFICULTY_XP[q.diff] }));
 const questById = (id) => QUEST_REPO.find((q) => q.id === id);
 const DAILY_SLOTS = 5;
 const COOLDOWN_DAYS = 3;
 
 /* ---------------------------------------------------------------------------
-   3. EXPEDICIONES — arco con 4 capítulos encadenados por llaves.
+   8. EXPEDICIONES — Arco 1 definido en v2 ("El Misterio de los Animales
+   Armados"). Arcos 2 y 3 pendientes de definir (entran a la rotación luego).
 --------------------------------------------------------------------------- */
 const ARCS = [
   {
-    id: "valdris",
-    title: "El Bosque de Valdris",
-    summary: "Un mal antiguo despierta bajo los árboles de Valdris.",
-    npc: { name: "Mira", role: "Exploradora de Valdris", attr: "FOC" },
-    relic: { name: "Espada de Valdris", lore: "Forjada por Mira, exploradora de Valdris, brilla cuando el bosque está en peligro." },
+    id: "animales",
+    title: "El Misterio de los Animales Armados",
+    summary: "Mercaderes atacados en la ruta y animales que visten armadura. ¿Quién los arma y para qué?",
+    npc: { name: "Maestro del Gremio", role: "Gremio de Bremont", attr: "INT" },
+    relic: { name: "Emblema Desconocido", lore: "La marca hallada en la armadura del lobo. El origen de todo el misterio." },
     chapters: [
-      { id: "v1", title: "Capítulo 1 — El Claro", level: "Lv. 1-5", tone: "green", boss: "Lobo Acorazado", key: "Llave del Claro", beat: "El lobo llevaba una marca. Alguien lo envió...", missions: ["Llegar al bosque", "Encontrar rastros extraños", "Seguir el rastro al claro"] },
-      { id: "v2", title: "Capítulo 2 — La Torre", level: "Lv. 6-12", tone: "amber", boss: "El Señor Corrupto", key: "Llave de la Torre", beat: "El símbolo pertenece a una orden antigua...", missions: ["Rastrear al señor del bosque", "Descubrir el campamento", "Sobrevivir la emboscada"] },
-      { id: "v3", title: "Capítulo 3 — El Abismo", level: "Lv. 13-20", tone: "red", boss: "El Archimago", key: "Sello del Abismo", beat: "El ritual casi termina. Algo fue invocado...", missions: ["Infiltrar la torre oscura", "Liberar a los prisioneros", "Interrumpir la invocación"] },
-      { id: "v4", title: "Capítulo 4 — Final del Arco", level: "Lv. 21+", tone: "violet", boss: "La Entidad del Abismo", key: "Reliquia de Valdris", beat: "El bosque quedó en silencio. Pero otras tierras esperan un nuevo héroe...", missions: ["La entidad despertó", "Reunir a los aliados", "Forjar el arma final", "La batalla final"], requiresKeys: 3 },
+      { id: "a1", title: "Capítulo 1 — Fácil", level: "Lv. 1-5", tone: "green", boss: "3 Lobos con Armadura", key: "Llave del Camino", beat: "Los carruajes fueron atacados, pero nada robado — solo faltan las personas.", missions: ["Investigar la ruta atacada", "Examinar los carruajes vacíos", "Seguir el grito hasta los lobos"] },
+      { id: "a2", title: "Capítulo 2 — Media", level: "Lv. 6-12", tone: "amber", boss: "El Oso Guardián", key: "Llave de la Mina", beat: "Una mina abandonada, armaduras de mercaderes en el piso... y un oso que las viste.", missions: ["Adentrarse en el bosque", "Sentir que algo te observa", "Llegar a la mina abandonada"] },
+      { id: "a3", title: "Capítulo 3 — Difícil", level: "Lv. 13-20", tone: "red", boss: "Pendiente de definir", key: "Sello del Misterio", beat: "¿Quién arma a los animales? El rastro se vuelve más oscuro.", missions: ["Pendiente de definir", "Pendiente de definir", "Pendiente de definir"] },
+      { id: "a4", title: "Capítulo 4 — Final", level: "Lv. 21+", tone: "violet", boss: "Pendiente de definir", key: "Reliquia del Arco 1", beat: "El misterio de los animales armados debe resolverse aquí.", missions: ["Pendiente de definir", "Pendiente de definir", "Pendiente de definir", "La batalla final"], requiresKeys: 3 },
     ],
   },
   {
-    id: "grath",
-    title: "Las Cimas de Grath",
-    summary: "Las montañas heladas guardan un secreto que congela el alma.",
-    npc: { name: "Brundir", role: "Guía de las cimas", attr: "VIT" },
-    relic: { name: "Pico de Grath", lore: "Tallado en hielo eterno, nunca se quiebra." },
+    id: "arco2",
+    title: "Arco 2 — Próximamente",
+    summary: "Temática, capítulos, NPCs y bosses pendientes de definir (backlog v2).",
+    npc: { name: "—", role: "Por definir", attr: "SOC" },
+    relic: { name: "Reliquia del Arco 2", lore: "Una historia que aún espera ser contada." },
     chapters: [
-      { id: "g1", title: "Capítulo 1 — El Sendero", level: "Lv. 1-5", tone: "green", boss: "Yeti Menor", key: "Llave de Hielo", beat: "La nieve oculta huellas que no son humanas...", missions: ["Cruzar el paso", "Encender la hoguera", "Hallar el refugio"] },
-      { id: "g2", title: "Capítulo 2 — La Tormenta", level: "Lv. 6-12", tone: "amber", boss: "Espíritu del Viento", key: "Llave de la Cumbre", beat: "El viento susurra un nombre olvidado...", missions: ["Resistir la ventisca", "Seguir las luces", "Encontrar el santuario"] },
-      { id: "g3", title: "Capítulo 3 — La Cima", level: "Lv. 13-20", tone: "red", boss: "Guardián de Hielo", key: "Sello Glacial", beat: "Algo duerme bajo la cima más alta...", missions: ["Escalar el muro helado", "Resolver el acertijo", "Despertar al guardián"] },
-      { id: "g4", title: "Capítulo 4 — Final del Arco", level: "Lv. 21+", tone: "violet", boss: "El Corazón Helado", key: "Reliquia de Grath", beat: "La montaña por fin respira en calma...", missions: ["El deshielo comienza", "Reunir el calor", "La última escalada", "La batalla final"], requiresKeys: 3 },
+      { id: "b1", title: "Capítulo 1 — Fácil", level: "Lv. 1-5", tone: "green", boss: "Por definir", key: "Llave 2-1", beat: "Pendiente de definir.", missions: ["Pendiente", "Pendiente", "Pendiente"] },
+      { id: "b2", title: "Capítulo 2 — Media", level: "Lv. 6-12", tone: "amber", boss: "Por definir", key: "Llave 2-2", beat: "Pendiente de definir.", missions: ["Pendiente", "Pendiente", "Pendiente"] },
+      { id: "b3", title: "Capítulo 3 — Difícil", level: "Lv. 13-20", tone: "red", boss: "Por definir", key: "Llave 2-3", beat: "Pendiente de definir.", missions: ["Pendiente", "Pendiente", "Pendiente"] },
+      { id: "b4", title: "Capítulo 4 — Final", level: "Lv. 21+", tone: "violet", boss: "Por definir", key: "Reliquia del Arco 2", beat: "Pendiente de definir.", missions: ["Pendiente", "Pendiente", "Pendiente", "La batalla final"], requiresKeys: 3 },
     ],
   },
   {
-    id: "ceniza",
-    title: "El Mar de Ceniza",
-    summary: "Un océano de cenizas esconde una ciudad sumergida.",
-    npc: { name: "Sael", role: "Navegante de ceniza", attr: "INT" },
-    relic: { name: "Brújula de Sael", lore: "Apunta siempre hacia lo que el corazón ha perdido." },
+    id: "arco3",
+    title: "Arco 3 — Próximamente",
+    summary: "Temática, capítulos, NPCs y bosses pendientes de definir (backlog v2).",
+    npc: { name: "—", role: "Por definir", attr: "VIT" },
+    relic: { name: "Reliquia del Arco 3", lore: "Una historia que aún espera ser contada." },
     chapters: [
-      { id: "c1", title: "Capítulo 1 — La Orilla", level: "Lv. 1-5", tone: "green", boss: "Cangrejo de Lava", key: "Llave de Brasa", beat: "La ceniza aún está caliente bajo tus pies...", missions: ["Llegar a la costa", "Construir la balsa", "Zarpar al amanecer"] },
-      { id: "c2", title: "Capítulo 2 — La Niebla", level: "Lv. 6-12", tone: "amber", boss: "Sirena de Humo", key: "Llave del Faro", beat: "Un canto te llama desde la niebla...", missions: ["Navegar a ciegas", "Encender el faro", "Resistir el canto"] },
-      { id: "c3", title: "Capítulo 3 — Las Profundidades", level: "Lv. 13-20", tone: "red", boss: "Leviatán de Ceniza", key: "Sello Abisal", beat: "La ciudad sumergida no estaba vacía...", missions: ["Sumergirse al fondo", "Encontrar la ciudad", "Despertar al leviatán"] },
-      { id: "c4", title: "Capítulo 4 — Final del Arco", level: "Lv. 21+", tone: "violet", boss: "El Rey de Ceniza", key: "Reliquia de Ceniza", beat: "El mar por fin se asienta, gris y silencioso...", missions: ["El rey despierta", "Reunir la flota", "Forjar el ancla sagrada", "La batalla final"], requiresKeys: 3 },
+      { id: "d1", title: "Capítulo 1 — Fácil", level: "Lv. 1-5", tone: "green", boss: "Por definir", key: "Llave 3-1", beat: "Pendiente de definir.", missions: ["Pendiente", "Pendiente", "Pendiente"] },
+      { id: "d2", title: "Capítulo 2 — Media", level: "Lv. 6-12", tone: "amber", boss: "Por definir", key: "Llave 3-2", beat: "Pendiente de definir.", missions: ["Pendiente", "Pendiente", "Pendiente"] },
+      { id: "d3", title: "Capítulo 3 — Difícil", level: "Lv. 13-20", tone: "red", boss: "Por definir", key: "Llave 3-3", beat: "Pendiente de definir.", missions: ["Pendiente", "Pendiente", "Pendiente"] },
+      { id: "d4", title: "Capítulo 4 — Final", level: "Lv. 21+", tone: "violet", boss: "Por definir", key: "Reliquia del Arco 3", beat: "Pendiente de definir.", missions: ["Pendiente", "Pendiente", "Pendiente", "La batalla final"], requiresKeys: 3 },
     ],
   },
 ];
@@ -113,43 +128,101 @@ const arcById = (id) => ARCS.find((a) => a.id === id);
 /* ---------------------------------------------------------------------------
    4-5. BOSSES y NPCs
 --------------------------------------------------------------------------- */
-const GENERIC_BOSS = {
-  id: "malakor",
-  name: "Malakor el Tocado por el Vacío",
-  type: "Boss Genérico",
-  maxHp: 1200,
-  healPct: 0.2, // cura ~20% si no es derrotado
-  art: "./assets/void-dragon.svg",
-  weakness: "FOC",
-  drop: "Medalla del Vacío",
-};
+// 4. BOSSES GENÉRICOS — 10 bosses, 2 por atributo de debilidad (tabla 11).
+// HP = nivel del boss × 40. Cura ~20% si no es derrotado ese día.
+const BOSSES = [
+  { id: "verdugo", name: "El Verdugo de Piedra", epithet: "La Bestia Olvidada de los Páramos de Xal'Thor", type: "Criatura", weakness: "STR", npc: "STR", dropSlots: ["weapon", "armor"], level: 3, hue: 18,
+    desc: "Un coloso de piedra ancestral imbuido por una energía maligna. Rompe su coraza con fuerza bruta o el combate se alargará sin fin." },
+  { id: "sombra", name: "La Sombra Errante", epithet: "El Espectro de Niebla Eterna", type: "Criatura", weakness: "INT", npc: "INT", dropSlots: ["helmet", "accessory"], level: 5, hue: 210,
+    desc: "Una entidad inmaterial que se alimenta de los miedos. Solo el conocimiento revela su núcleo vulnerable." },
+  { id: "toro", name: "El Toro Corrupto", epithet: "La Bestia que Acechó los Campos de Sangre", type: "Criatura", weakness: "VIT", npc: "VIT", dropSlots: ["armor", "boots"], level: 7, hue: -35,
+    desc: "Un asesino de batalla transformado por la magia de sangre. Sus embestidas brutales exigen una vitalidad férrea para resistir." },
+  { id: "cazador", name: "El Cazador Silencioso", epithet: "La Sombra de los Bosques del Norte", type: "Humanoide", weakness: "DIS", npc: "DIS", dropSlots: ["boots", "accessory"], level: 9, hue: 80,
+    desc: "Un asesino que acecha desde las copas de los árboles. Solo la disciplina constante anticipa su próximo golpe." },
+  { id: "orador", name: "El Orador Maldito", epithet: "Archienemigo de las Palabras Prohibidas", type: "Humanoide", weakness: "SOC", npc: null, dropSlots: ["accessory", "helmet"], level: 11, hue: 145,
+    desc: "Un erudito que vendió su alma por los lenguajes de la creación. Sus versos doblegan la voluntad; un aliado fuerte marca la diferencia." },
+  { id: "pantano", name: "La Bestia del Pantano", epithet: "El Horror de las Ciénagas Hundidas", type: "Criatura", weakness: "STR", npc: "STR", dropSlots: ["weapon", "armor"], level: 13, hue: 30,
+    desc: "Una mole de fango y huesos que arrastra a sus presas al lodo. Golpéala con todo antes de que te hunda." },
+  { id: "archivista", name: "El Archivista Caído", epithet: "Guardián de las Bibliotecas Prohibidas", type: "Humanoide", weakness: "INT", npc: "INT", dropSlots: ["helmet", "accessory"], level: 15, hue: 225,
+    desc: "Un bibliotecario maldito que protege secretos que nunca debieron leerse. Su mente es su mayor arma y su debilidad." },
+  { id: "coloso", name: "El Coloso Oxidado", epithet: "El Autómata que Nunca Descansa", type: "Criatura", weakness: "VIT", npc: "VIT", dropSlots: ["armor", "weapon"], level: 17, hue: -20,
+    desc: "Una máquina de guerra antigua que sigue cumpliendo una orden olvidada. Sobrevive a su embate y caerá por su propio óxido." },
+  { id: "desertor", name: "El Desertor de la Orden", epithet: "El Caballero que Renegó de su Juramento", type: "Humanoide", weakness: "DIS", npc: "DIS", dropSlots: ["boots", "weapon"], level: 19, hue: 60,
+    desc: "Un guerrero entrenado que conoce todas las tretas del campo de batalla. Solo una disciplina superior lo supera." },
+  { id: "heraldo", name: "El Heraldo Sin Rostro", epithet: "La Voz de lo que No Tiene Nombre", type: "Humanoide", weakness: "SOC", npc: "narrativo", dropSlots: ["accessory", "helmet"], level: 21, hue: 160,
+    desc: "Un mensajero de poderes innombrables. Sus palabras quiebran la cordura; necesitarás aliados de confianza para enfrentarlo." },
+].map((b) => ({ ...b, maxHp: b.level * 40, healPct: 0.2, badge: b.type }));
+const bossById = (id) => BOSSES.find((b) => b.id === id);
 
-// 5.1 NPCs básicos — uno por atributo
+// 5.1 NPCs básicos — uno por atributo. El bonus de cada NPC se amplifica con SOC.
 const BASIC_NPCS = [
   { attr: "STR", name: "Guerrero", icon: "⚔", effect: "Daño adicional por cada misión completada.", when: "Boss con mucha vida." },
   { attr: "INT", name: "Sabio", icon: "✦", effect: "+XP de todas las misiones del combate.", when: "Para maximizar XP del día." },
   { attr: "VIT", name: "Sanador", icon: "✚", effect: "Cura PV tras el contraataque del boss.", when: "Cuando tienes PV bajos." },
   { attr: "DIS", name: "Explorador", icon: "▣", effect: "Mejora la rareza de los drops.", when: "Cuando buscas equipo." },
-  { attr: "FOC", name: "Mago", icon: "◆", effect: "Reduce el daño de los ataques del boss.", when: "Para sobrevivir sin llegar a 0 PV." },
+  { attr: "SOC", name: "Bardo", icon: "🎵", effect: "Eleva la moral: aumenta el daño de todas las misiones.", when: "Para potenciar el combate con tus aliados." },
 ];
 const npcByAttr = (attr) => BASIC_NPCS.find((n) => n.attr === attr);
 
 /* ---------------------------------------------------------------------------
-   6. EQUIPO — ranuras fijas, rareza, escalado por umbral
+   6. SETS DE EQUIPO — 4 sets temáticos, 5 piezas cada uno (tablas 19-22).
+   Sin bonus de set. Cada pieza: bonus base (siempre) + bonus completo (umbral).
+   La Reliquia es exclusiva de expediciones.
 --------------------------------------------------------------------------- */
 const EQUIP_SLOTS = [
-  { id: "weapon", label: "Arma", primary: "STR", secondary: "DIS" },
-  { id: "armor", label: "Armadura", primary: "VIT", secondary: "STR" },
-  { id: "accessory", label: "Accesorio", primary: "FOC", secondary: "INT" },
-  { id: "helmet", label: "Casco", primary: "INT", secondary: "FOC" },
-  { id: "boots", label: "Botas", primary: "DIS", secondary: "VIT" },
-  { id: "relic", label: "Reliquia", primary: "ALL", secondary: null },
+  { id: "weapon", label: "Arma" },
+  { id: "armor", label: "Armadura" },
+  { id: "accessory", label: "Accesorio" },
+  { id: "helmet", label: "Casco" },
+  { id: "boots", label: "Botas" },
+  { id: "relic", label: "Reliquia" },
 ];
-const RARITY = {
-  common: { label: "Común", primaryBonus: 1, secondaryBonus: 0 },
-  rare: { label: "Raro", primaryBonus: 2, secondaryBonus: 1 },
-  epic: { label: "Épico", primaryBonus: 3, secondaryBonus: 2 },
-};
+const SLOT_LABEL = (id) => EQUIP_SLOTS.find((s) => s.id === id)?.label ?? id;
+
+// thr: ["level", n] umbral de nivel · ["attr", "STR", n] umbral de atributo
+const EQUIP_SETS = [
+  {
+    id: "bosque", name: "Set del Bosque", note: "Natural · inicio recomendado",
+    pieces: {
+      weapon: { name: "Espada de Raíces", thr: ["attr", "STR", 15], base: { STR: 2 }, full: { STR: 4, DIS: 2 } },
+      armor: { name: "Coraza de Corteza", thr: ["level", 8], base: { VIT: 2 }, full: { VIT: 4, STR: 1 } },
+      accessory: { name: "Amuleto del Claro", thr: ["attr", "INT", 10], base: { INT: 1 }, full: { INT: 3, SOC: 1 } },
+      helmet: { name: "Capucha Musgo", thr: ["level", 6], base: { INT: 2 }, full: { INT: 3, DIS: 2 } },
+      boots: { name: "Botas del Sendero", thr: ["attr", "DIS", 12], base: { DIS: 2 }, full: { DIS: 4, VIT: 1 } },
+    },
+  },
+  {
+    id: "montana", name: "Set de la Montaña", note: "Resistente · niveles medios",
+    pieces: {
+      weapon: { name: "Hacha de Granito", thr: ["attr", "STR", 18], base: { STR: 2 }, full: { STR: 5, VIT: 1 } },
+      armor: { name: "Peto de Roca", thr: ["level", 12], base: { VIT: 3 }, full: { VIT: 5, STR: 2 } },
+      accessory: { name: "Cristal de Cima", thr: ["attr", "SOC", 15], base: { SOC: 2 }, full: { SOC: 4, INT: 1 } },
+      helmet: { name: "Yelmo de Piedra", thr: ["attr", "VIT", 15], base: { VIT: 2 }, full: { VIT: 4, DIS: 1 } },
+      boots: { name: "Botas del Escalador", thr: ["level", 10], base: { DIS: 2 }, full: { DIS: 4, STR: 2 } },
+    },
+  },
+  {
+    id: "desierto", name: "Set del Desierto", note: "Ágil · orientado a INT",
+    pieces: {
+      weapon: { name: "Cimitarra de Arena", thr: ["level", 10], base: { STR: 2 }, full: { STR: 4, INT: 2 } },
+      armor: { name: "Túnica del Viajero", thr: ["attr", "DIS", 18], base: { DIS: 2 }, full: { DIS: 4, VIT: 1 } },
+      accessory: { name: "Ojo del Halcón", thr: ["attr", "INT", 18], base: { INT: 2 }, full: { INT: 4, SOC: 2 } },
+      helmet: { name: "Turbante del Sabio", thr: ["level", 14], base: { INT: 3 }, full: { INT: 5, DIS: 1 } },
+      boots: { name: "Sandalias del Nómada", thr: ["attr", "SOC", 12], base: { SOC: 2 }, full: { SOC: 4, DIS: 1 } },
+    },
+  },
+  {
+    id: "jungla", name: "Set de la Jungla", note: "Vital · orientado a SOC",
+    pieces: {
+      weapon: { name: "Lanza del Cazador", thr: ["attr", "STR", 20], base: { STR: 2 }, full: { STR: 4, SOC: 2 } },
+      armor: { name: "Escamas del Reptil", thr: ["attr", "VIT", 18], base: { VIT: 3 }, full: { VIT: 5, DIS: 2 } },
+      accessory: { name: "Diente de Fiera", thr: ["level", 12], base: { SOC: 2 }, full: { SOC: 4, STR: 2 } },
+      helmet: { name: "Máscara Tribal", thr: ["attr", "SOC", 20], base: { SOC: 2 }, full: { SOC: 5, INT: 1 } },
+      boots: { name: "Pisada Sigilosa", thr: ["attr", "DIS", 15], base: { DIS: 2 }, full: { DIS: 4, VIT: 2 } },
+    },
+  },
+];
+const setById = (id) => EQUIP_SETS.find((s) => s.id === id);
 
 /* ---------------------------------------------------------------------------
    7. HABILIDADES PASIVAS — umbrales 10 · 25 · 50 · 100
@@ -179,11 +252,11 @@ const PASSIVES = {
     { t: 50, name: "Disciplina", desc: "Tolera 3 fallos/semana. Enfriamiento a 2 días." },
     { t: 100, name: "Maestría", desc: "La racha nunca decae. Enfriamiento a 1 día." },
   ],
-  FOC: [
-    { t: 10, name: "Concentración", desc: "+1 misión de enfoque disponible por día." },
-    { t: 25, name: "Claridad", desc: "Pendiente de definir (siguiente iteración)." },
-    { t: 50, name: "Visión", desc: "Pendiente de definir (siguiente iteración)." },
-    { t: 100, name: "Iluminado", desc: "+5% a todos los atributos. Misiones de FOC exclusivas." },
+  SOC: [
+    { t: 10, name: "Carisma", desc: "El bonus de daño del NPC en combate aumenta +10%." },
+    { t: 25, name: "Vínculos", desc: "El NPC elegido ataca dos veces durante el día de combate." },
+    { t: 50, name: "Red de Aliados", desc: "Al derrotar un boss, el NPC puede dejar un consumible adicional." },
+    { t: 100, name: "Leyenda", desc: "NPCs narrativos reaparecen más seguido con +20% de bonus y diálogo exclusivo." },
   ],
 };
 
@@ -220,10 +293,13 @@ function freshState() {
     // quests diarias
     dailyQuests: [],
     completedToday: [],
+    timers: {}, // questId -> { remaining, running, startedAt, done }
     focusAttr: null,
     cooldowns: {}, // questId -> fecha de expiración
     lastReset: null,
     // boss
+    bossMode: "select", // "select" (preparación) | "battle"
+    selectedBoss: null, // bossId elegido
     bossDamage: {}, // bossId -> daño acumulado
     bossesDefeated: 0,
     bossesByType: { generic: 0, expedition: 0 },
@@ -347,6 +423,7 @@ function ensureDailyReset() {
   state.battleDone = [];
   state.equippedConsumables = [];
   state.selectedNpc = null;
+  state.timers = {}; // nuevos temporizadores cada día
   state.lastReset = t;
   generateDailyQuests();
   save();
@@ -413,35 +490,52 @@ function registerStreakActivity() {
 /* =========================================================================
    ATRIBUTOS, EQUIPO Y TOTALES
    ========================================================================= */
-function totalAttributes() {
+// 1.1 Multiplicador de atributos por nivel = 1 + (Nivel × 0.1).
+// Aplica al valor efectivo en combate, NO a los umbrales de pasivas.
+function levelMultiplier() {
+  return 1 + state.level * 0.1;
+}
+
+// Datos de una pieza equipada: set + pieza del catálogo.
+function equipPiece(item) {
+  const set = setById(item?.set);
+  return set?.pieces[item?.slot] || null;
+}
+
+// 6.3 escalado por umbral: nivel del personaje O atributo (valor real ganado).
+function isAwakened(item) {
+  const p = equipPiece(item);
+  if (!p) return false;
+  if (p.thr[0] === "level") return state.level >= p.thr[1];
+  return (state.attributes[p.thr[1]] ?? 0) >= p.thr[2];
+}
+
+// Totales base + equipo (sin multiplicador de nivel). Para HP y visualización.
+function gearTotals() {
   const totals = { ...baseAttributes(), ...state.attributes };
-  Object.values(state.equipment).forEach((item) => {
+  Object.values(state.equipment || {}).forEach((item) => {
     if (!item) return;
-    const slot = EQUIP_SLOTS.find((s) => s.id === item.slot);
-    const r = RARITY[item.rarity];
-    const awakened = isAwakened(item);
     if (item.slot === "relic") {
-      ATTR_IDS.forEach((id) => (totals[id] += awakened ? 3 : 2));
+      const v = isAwakened(item) ? 3 : 2;
+      ATTR_IDS.forEach((id) => (totals[id] += v));
       return;
     }
-    if (slot?.primary && slot.primary !== "ALL") {
-      totals[slot.primary] += r.primaryBonus + (awakened ? 1 : 0);
-    }
-    if (slot?.secondary && awakened) {
-      totals[slot.secondary] += r.secondaryBonus;
-    }
+    const p = equipPiece(item);
+    if (!p) return;
+    const bonus = isAwakened(item) ? p.full : p.base;
+    Object.entries(bonus).forEach(([a, n]) => (totals[a] += n));
   });
-  // FOC ≥ 100 — Iluminado: +5% a todos los atributos
-  if ((state.attributes.FOC ?? 0) >= 100) {
-    ATTR_IDS.forEach((id) => (totals[id] = Math.round(totals[id] * 1.05)));
-  }
   return totals;
 }
 
-function isAwakened(item) {
-  // 6.3 escalado por umbral: nivel del personaje o atributo
-  if (item.thresholdType === "level") return state.level >= item.threshold;
-  return (state.attributes[item.thresholdAttr] ?? 0) >= item.threshold;
+// Mantengo el nombre totalAttributes para compatibilidad: base + equipo.
+function totalAttributes() {
+  return gearTotals();
+}
+
+// Valor efectivo de un atributo en combate (con multiplicador de nivel).
+function combatAttr(attr) {
+  return Math.round((gearTotals()[attr] ?? 0) * levelMultiplier());
 }
 
 /* Pasivas activas */
@@ -476,10 +570,10 @@ function passiveXpBonus() {
 }
 
 /* =========================================================================
-   2.1 NIVEL DE PERSONAJE — curva exponencial
+   3.2 CURVA DE NIVELES — XP requerido = 100 × Nivel²
    ========================================================================= */
 function xpForLevel(level) {
-  return Math.round(800 * Math.pow(1.35, level - 1));
+  return 100 * level * level;
 }
 
 function gainXp(amount) {
@@ -493,7 +587,12 @@ function gainXp(amount) {
     state.level += 1;
     leveled = true;
   }
-  if (leveled) toast(`¡Subiste a Nivel ${state.level}!`, "#f2cc45", "⭐");
+  if (leveled) {
+    // 3.5 pop de subida de nivel: +1 HP base y restauración completa de PV
+    state.heroHp = maxHeroHp();
+    state.resting = false;
+    toast(`¡Subiste a Nivel ${state.level}! Multiplicador ×${levelMultiplier().toFixed(1)} · PV restaurados`, "#f2cc45", "⭐");
+  }
   return total;
 }
 
@@ -513,7 +612,158 @@ function gainAttr(attr, amount) {
 }
 
 function attrBadge(attr) {
-  return { STR: "💪", INT: "📘", VIT: "💚", DIS: "🎯", FOC: "🧠" }[attr] || "✦";
+  return { STR: "💪", INT: "📘", VIT: "💚", DIS: "🎯", SOC: "🗣" }[attr] || "✦";
+}
+
+/* =========================================================================
+   TEMPORIZADOR DE MISIONES — solo para misiones de tiempo (q.minutes).
+   Las misiones de descanso o de conteo no tienen temporizador.
+   ========================================================================= */
+function isTimed(q) {
+  return Boolean(q && q.minutes);
+}
+
+function getTimer(id) {
+  const q = questById(id);
+  if (!isTimed(q)) return null;
+  state.timers ??= {};
+  if (!state.timers[id]) {
+    state.timers[id] = { remaining: q.minutes * 60, running: false, startedAt: null, done: false };
+  }
+  return state.timers[id];
+}
+
+// segundos restantes en vivo (descuenta el tiempo transcurrido si está corriendo)
+function timerRemaining(id) {
+  const t = getTimer(id);
+  if (!t) return 0;
+  if (t.running && t.startedAt) {
+    const elapsed = Math.floor((Date.now() - t.startedAt) / 1000);
+    return Math.max(0, t.remaining - elapsed);
+  }
+  return t.remaining;
+}
+
+function timerDone(id) {
+  const q = questById(id);
+  if (!isTimed(q)) return true; // sin temporizador no bloquea
+  return getTimer(id).done || timerRemaining(id) <= 0;
+}
+
+function startTimer(id) {
+  const t = getTimer(id);
+  if (!t || t.done) return;
+  unlockAudio();
+  // Solo un cronómetro activo a la vez: pausa cualquier otro en curso.
+  let paused = null;
+  Object.keys(state.timers ?? {}).forEach((otherId) => {
+    const other = state.timers[otherId];
+    if (otherId !== id && other.running) {
+      other.remaining = timerRemaining(otherId);
+      other.running = false;
+      other.startedAt = null;
+      paused = questById(otherId);
+    }
+  });
+  if (paused) toast(`Pausado: ${paused.name}. Solo puedes cronometrar una misión a la vez.`, "#f2cc45", "⏸");
+  t.running = true;
+  t.startedAt = Date.now();
+  save();
+  render();
+}
+
+function pauseTimer(id) {
+  const t = getTimer(id);
+  if (!t || !t.running) return;
+  t.remaining = timerRemaining(id);
+  t.running = false;
+  t.startedAt = null;
+  save();
+  render();
+}
+
+function resetTimer(id) {
+  const q = questById(id);
+  if (!isTimed(q)) return;
+  state.timers[id] = { remaining: q.minutes * 60, running: false, startedAt: null, done: false };
+  save();
+  render();
+}
+
+// se llama cada segundo: detecta cuando un temporizador llega a cero
+function tickTimers() {
+  let changed = false;
+  Object.keys(state.timers ?? {}).forEach((id) => {
+    const t = state.timers[id];
+    if (!t.running || t.done) return;
+    if (timerRemaining(id) <= 0) {
+      t.remaining = 0;
+      t.running = false;
+      t.startedAt = null;
+      t.done = true;
+      changed = true;
+      const q = questById(id);
+      playAlarm();
+      toast(`¡Tiempo cumplido! ${q.name} — reclama la misión`, "#7ecb8e", "⏰");
+    }
+  });
+  if (changed) {
+    save();
+    render();
+  } else {
+    updateTimerLabels();
+  }
+}
+
+// actualiza solo los números del temporizador sin re-render completo
+function updateTimerLabels() {
+  $$("[data-timer-label]").forEach((el) => {
+    const id = el.dataset.timerLabel;
+    const t = state.timers?.[id];
+    if (!t?.running) return;
+    el.textContent = formatClock(timerRemaining(id));
+    const fill = document.querySelector(`[data-timer-fill="${id}"]`);
+    if (fill) {
+      const q = questById(id);
+      fill.style.width = `${100 - (timerRemaining(id) / (q.minutes * 60)) * 100}%`;
+    }
+  });
+}
+
+function formatClock(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+/* ---- Alarma corta con Web Audio (sin assets) ---- */
+let audioCtx = null;
+function unlockAudio() {
+  try {
+    audioCtx ??= new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+  } catch {}
+}
+function playAlarm() {
+  try {
+    unlockAudio();
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    // tres pitidos ascendentes
+    [880, 1100, 1320].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      const start = now + i * 0.22;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.25, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.2);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(start);
+      osc.stop(start + 0.22);
+    });
+  } catch {}
 }
 
 /* =========================================================================
@@ -523,13 +773,20 @@ function completeQuest(id) {
   if (state.completedToday.includes(id)) return;
   const q = questById(id);
   if (!q) return;
+  // Las misiones de tiempo requieren cumplir el temporizador antes de reclamar.
+  if (isTimed(q) && !timerDone(id)) {
+    toast(`Inicia y completa el temporizador de "${q.name}" primero.`, "#f2cc45", "⏳");
+    return;
+  }
   state.completedToday.push(id);
   state.totalQuestsDone += 1;
   state.questCompletions[id] = (state.questCompletions[id] || 0) + 1;
 
   registerStreakActivity();
   const xpGained = gainXp(q.xp);
-  gainAttr(q.attr, Math.max(2, Math.round(q.xp / 50)));
+  // Puntos de atributo por dificultad de la misión.
+  const attrByDiff = { facil: 1, media: 2, dificil: 4, expedicion: 6 };
+  gainAttr(q.attr, attrByDiff[q.diff] ?? 2);
 
   // El valor XP define el daño al boss activo si hay combate en curso
   state.activityLog.unshift({ t: today(), text: `${q.name} (+${xpGained} XP, ${q.attr})` });
@@ -546,7 +803,7 @@ function completeQuest(id) {
    4. SISTEMA DE BOSSES
    ========================================================================= */
 function activeBoss() {
-  return GENERIC_BOSS;
+  return bossById(state.selectedBoss) || BOSSES[0];
 }
 function bossDamageDone() {
   return state.bossDamage[activeBoss().id] || 0;
@@ -559,26 +816,34 @@ function bossHp() {
 function bossIntel() {
   const int = totalAttributes().INT ?? 0;
   const boss = activeBoss();
+  const wk = attrInfo(boss.weakness);
+  const recNpc = boss.npc && boss.npc !== "narrativo" ? npcByAttr(boss.npc)?.name : "un NPC narrativo";
   if (int >= 50) {
-    return { tier: "INT ≥ 50", lines: [`Debilidad revelada: ${attrInfo(boss.weakness).label} (${boss.weakness}).`, `Drop garantizado (${boss.drop}) si usas al NPC ${npcByAttr(boss.weakness).name}.`] };
+    return { tier: "INT ≥ 50", lines: [`Debilidad revelada: ${wk.label} (${boss.weakness}).`, `Drop de set garantizado si usas al NPC ${recNpc} (golpea su debilidad).`] };
   }
   if (int >= 25) {
-    return { tier: "INT ≥ 25", lines: ["Información táctica: este enemigo teme la concentración sostenida.", `Conviene un NPC de tipo ${npcByAttr(boss.weakness).name} o Guerrero.`] };
+    return { tier: "INT ≥ 25", lines: ["Información táctica: golpea su debilidad para acortar el combate.", `NPC recomendado: ${recNpc}.`] };
   }
   return { tier: "INT < 25", lines: ["Un enemigo poderoso acecha. Prepárate."] };
 }
 
-// daño de una misión de combate
+// daño de una misión de combate (XP base × multiplicadores)
 function questBattleDamage(q) {
-  const totals = totalAttributes();
-  let dmg = q.xp; // el XP de la misión define el daño base
-  // modificador de stats (el atributo de la misión amplifica)
-  dmg *= 1 + (totals[q.attr] ?? 0) * 0.02;
-  // bonus de pasivas STR
+  let dmg = q.xp; // el XP de la misión define el daño base (10/20/50/100)
+  // el atributo de la misión (valor efectivo con multiplicador de nivel) amplifica
+  dmg *= 1 + combatAttr(q.attr) * 0.01;
+  // bonus de pasivas de STR
   dmg *= 1 + passiveDamageBonus();
-  // bonus NPC Guerrero (+daño por misión)
-  if (state.selectedNpc === "STR") dmg *= 1.2;
-  // bonus debilidad si NPC coincide con debilidad
+  // bonus del NPC, amplificado por SOC (Carisma +10%, Vínculos ×2)
+  let npcBonus = 0;
+  if (state.selectedNpc === "STR") npcBonus = 0.2; // Guerrero
+  else if (state.selectedNpc === "SOC") npcBonus = 0.15; // Bardo
+  if (npcBonus > 0) {
+    if (hasPassive("SOC", 10)) npcBonus *= 1.1; // Carisma
+    if (hasPassive("SOC", 25)) npcBonus *= 2; // Vínculos (ataca dos veces)
+  }
+  dmg *= 1 + npcBonus;
+  // bonus por golpear la debilidad del boss con el NPC adecuado
   if (state.selectedNpc === activeBoss().weakness) dmg *= 1.25;
   // tónico de batalla equipado
   if (state.equippedConsumables.includes("tonic")) dmg *= 1.2;
@@ -597,8 +862,9 @@ function pendingBattleDamage() {
   }, 0);
 }
 
+// 3.3 HP del héroe = 10 (base) + Nivel + (VIT ÷ 10)
 function maxHeroHp() {
-  return 100 + (totalAttributes().VIT ?? 0) * 8;
+  return 10 + state.level + Math.floor((gearTotals().VIT ?? 0) / 10);
 }
 function ensureHeroHp() {
   const max = maxHeroHp();
@@ -610,8 +876,9 @@ function ensureHeroHp() {
 function markBattleMission(id) {
   if (state.resting) return;
   if (!state.completedToday.includes(id)) {
-    // debe completarse como quest real primero
+    // debe completarse como quest real primero (respeta el temporizador)
     completeQuest(id);
+    if (!state.completedToday.includes(id)) return; // bloqueada por temporizador
   }
   if (state.battleDone.includes(id)) return;
   state.battleDone.push(id);
@@ -636,20 +903,17 @@ function attackBoss() {
   }
   save();
   render();
-  playBattleAnimation();
+  openCombatPop(dmg);
 }
 
 function bossCounterAttack() {
   ensureHeroHp();
-  const vit = totalAttributes().VIT ?? 0;
-  let raw = 45;
-  // NPC Mago (FOC) reduce daño del boss
-  if (state.selectedNpc === "FOC") raw *= 0.6;
-  const mitigated = Math.max(5, Math.round(raw - vit * 1.4));
-  state.heroHp = Math.max(0, state.heroHp - mitigated);
+  // 4.1 daño del boss al héroe ≈ HP máximo × 0.35 por día, repartido por golpe.
+  let hit = Math.max(1, Math.round(maxHeroHp() * 0.12));
+  state.heroHp = Math.max(0, state.heroHp - hit);
   // NPC Sanador (VIT) cura tras el contraataque
   if (state.selectedNpc === "VIT") {
-    state.heroHp = Math.min(maxHeroHp(), state.heroHp + Math.round(maxHeroHp() * 0.12));
+    state.heroHp = Math.min(maxHeroHp(), state.heroHp + Math.round(maxHeroHp() * 0.15));
   }
   if (state.heroHp <= 0) enterRest();
 }
@@ -659,12 +923,11 @@ function defeatBoss() {
   state.bossesDefeated += 1;
   state.bossesByType.generic += 1;
   toast(`¡${boss.name} derrotado!`, "#d43b4a", "🏆");
-  // drop de equipo (mejora rareza con NPC Explorador o pasiva STR≥25)
-  let rarity = "common";
-  if (state.selectedNpc === "DIS" || hasPassive("STR", 25)) rarity = "rare";
-  dropEquipment(rarity);
-  // drop de consumible
+  // drop de equipo del set temático según los slots del boss
+  dropEquipment(boss);
+  // drop de consumible (SOC ≥ 50 Red de Aliados: posible consumible extra)
   addConsumable(Math.random() < 0.5 ? "elixir" : "tonic", 1, true);
+  if (hasPassive("SOC", 50) && Math.random() < 0.5) addConsumable("herb", 1, true);
   // resetear daño para que pueda reaparecer otro día
   state.bossDamage[boss.id] = 0;
 }
@@ -752,39 +1015,32 @@ function consumeOne(id) {
 }
 
 /* =========================================================================
-   EQUIPO — drops
+   EQUIPO — drops desde los sets temáticos
    ========================================================================= */
-const ITEM_NAMES = {
-  weapon: ["Espada del Alba", "Hacha de Guerra", "Filo Rúnico"],
-  armor: ["Coraza de Roble", "Cota de Mallas", "Peto del Guardián"],
-  accessory: ["Anillo Arcano", "Talismán de Foco", "Amuleto del Sabio"],
-  helmet: ["Yelmo del Erudito", "Capucha Mística", "Diadema Lúcida"],
-  boots: ["Botas del Viajero", "Grebas de Hierro", "Sandalias Veloces"],
-};
+// Set recomendado según el nivel del personaje (los sets escalan).
+function setForLevel() {
+  if (state.level >= 14) return "jungla";
+  if (state.level >= 10) return "desierto";
+  if (state.level >= 6) return "montana";
+  return "bosque";
+}
 
-function dropEquipment(rarity) {
-  const slots = EQUIP_SLOTS.filter((s) => s.id !== "relic");
-  const slot = slots[Math.floor(Math.random() * slots.length)];
-  const names = ITEM_NAMES[slot.id];
-  const name = names[Math.floor(Math.random() * names.length)];
-  const useLevel = Math.random() < 0.5;
-  const item = {
-    slot: slot.id,
-    name,
-    rarity,
-    thresholdType: useLevel ? "level" : "attr",
-    thresholdAttr: slot.primary,
-    threshold: useLevel ? state.level + 3 : (state.attributes[slot.primary] ?? 0) + 10,
-  };
+function dropEquipment(boss) {
+  // elige una de las ranuras temáticas del boss
+  const slotId = boss.dropSlots[Math.floor(Math.random() * boss.dropSlots.length)];
+  const setId = setForLevel();
+  const piece = setById(setId).pieces[slotId];
+  const item = { slot: slotId, set: setId, name: piece.name };
   // Flujo de reemplazo simple: el nuevo siempre se equipa (el viejo se descarta)
-  state.equipment[slot.id] = item;
-  toast(`Equipas ${name} (${RARITY[rarity].label})`, "#f2cc45", "⚔");
+  state.equipment[slotId] = item;
+  toast(`Equipas ${piece.name} · ${setById(setId).name}`, "#f2cc45", "⚔");
 }
 
 function addRelic(arc) {
   if (state.relics.find((r) => r.arc === arc.id)) return;
   state.relics.push({ arc: arc.id, name: arc.relic.name, lore: arc.relic.lore, date: today() });
-  state.equipment.relic = { slot: "relic", name: arc.relic.name, rarity: "epic", thresholdType: "level", threshold: 1 };
+  // La reliquia es exclusiva de expediciones: +todos los stats, no reemplazable.
+  state.equipment.relic = { slot: "relic", set: null, name: arc.relic.name };
 }
 
 /* =========================================================================
@@ -860,13 +1116,33 @@ function toast(text, color, icon) {
   }, 2600);
 }
 
-function playBattleAnimation() {
-  const stage = $("#battle-stage");
-  if (!stage) return;
+// Pop-up de combate: muestra el duelo pixel al atacar (en vez de un escenario fijo)
+let combatPopTimer = null;
+function openCombatPop(dmg) {
+  const pop = $("#combat-pop");
+  const stage = $("#cp-stage");
+  if (!pop || !stage) return;
+  const boss = activeBoss();
+  const hp = bossHp();
+  $("#cp-dmg-label").textContent = `−${fmt(dmg)} PV`;
+  $("#cp-boss-name").textContent = boss.name;
+  $("#cp-boss-hp").textContent = `${fmt(hp)} / ${fmt(boss.maxHp)} PV`;
+  $("#cp-hp-bar").style.width = `${(hp / boss.maxHp) * 100}%`;
+  $("#cp-close").textContent = hp <= 0 ? "🏆 ¡Victoria!" : "Continuar";
+
+  pop.classList.remove("hidden");
+  // reinicia y dispara la animación del duelo
   stage.classList.remove("is-attacking");
   void stage.offsetWidth;
   stage.classList.add("is-attacking");
-  setTimeout(() => stage.classList.remove("is-attacking"), 900);
+
+  clearTimeout(combatPopTimer);
+  combatPopTimer = setTimeout(closeCombatPop, 2600);
+}
+function closeCombatPop() {
+  clearTimeout(combatPopTimer);
+  const pop = $("#combat-pop");
+  if (pop) pop.classList.add("hidden");
 }
 
 /* =========================================================================
@@ -879,6 +1155,41 @@ function rankForLevel(lvl) {
   if (lvl >= 13) return "Veterano";
   if (lvl >= 6) return "Aventurero";
   return "Aprendiz";
+}
+
+function renderTimerPanel(id) {
+  const q = questById(id);
+  const t = getTimer(id);
+  const remaining = timerRemaining(id);
+  const total = q.minutes * 60;
+  const pct = 100 - (remaining / total) * 100;
+  const done = t.done || remaining <= 0;
+  const action = done ? "reset" : t.running ? "pause" : "start";
+  const actionLabel = done ? "Reiniciar" : t.running ? "Pausar" : remaining < total ? "Reanudar" : "Iniciar";
+  return `
+    <div class="timer-panel ${done ? "done" : ""} ${t.running ? "running" : ""}">
+      <div class="timer-head">
+        <strong data-timer-label="${id}">${formatClock(remaining)}</strong>
+        <span>${done ? "✓ Tiempo cumplido" : t.running ? "En curso…" : "Sesión cronometrada"}</span>
+      </div>
+      <div class="timer-track"><span data-timer-fill="${id}" style="width:${pct}%"></span></div>
+      <div class="timer-actions">
+        <button class="mini-button" data-timer-action="${action}" data-timer-id="${id}" type="button">${actionLabel}</button>
+        ${!done && remaining < total ? `<button class="mini-button ghost" data-timer-action="reset" data-timer-id="${id}" type="button">Reset</button>` : ""}
+      </div>
+    </div>`;
+}
+
+function bindTimerButtons() {
+  $$("[data-timer-action]").forEach((b) =>
+    b.addEventListener("click", () => {
+      const id = b.dataset.timerId;
+      const action = b.dataset.timerAction;
+      if (action === "start") startTimer(id);
+      else if (action === "pause") pauseTimer(id);
+      else if (action === "reset") resetTimer(id);
+    }),
+  );
 }
 
 function renderQuests() {
@@ -908,27 +1219,29 @@ function renderQuests() {
       if (!q) return "";
       const done = state.completedToday.includes(id);
       const info = attrInfo(q.attr);
-      const isLagSlot = i === DAILY_SLOTS - 1;
+      const timed = isTimed(q);
+      const ready = !timed || timerDone(id);
       return `
         <article class="quest-card ${done ? "completed" : ""}" style="--c:${info.color}">
           <div>
-            <small style="color:${info.color}">${info.label} · ${q.attr}</small>
+            <small style="color:${info.color}">${info.label} · ${q.attr} · ${DIFFICULTY_LABEL[q.diff]}${timed ? ` · ⏱ ${q.minutes} min` : ""}</small>
             <h4>${q.icon} ${q.name}</h4>
             <p>${q.habit}</p>
             <div class="reward-row">
               <span>+${q.xp} XP</span>
               <span style="border-color:${info.color};color:${info.color}">${q.attr}</span>
-              ${isLagSlot ? "" : ""}
             </div>
           </div>
-          <button class="complete-button" data-quest="${id}" type="button" ${done ? "disabled" : ""}>
-            ${done ? "Completada ✓" : "Completar"}
+          ${timed && !done ? renderTimerPanel(id) : ""}
+          <button class="complete-button" data-quest="${id}" type="button" ${done || !ready ? "disabled" : ""}>
+            ${done ? "Completada ✓" : timed && !ready ? "Esperando temporizador" : "Completar"}
           </button>
         </article>`;
     })
     .join("");
 
   $$("[data-quest]").forEach((b) => b.addEventListener("click", () => completeQuest(b.dataset.quest)));
+  bindTimerButtons();
   $$("[data-focus]").forEach((b) =>
     b.addEventListener("click", () => {
       const v = b.dataset.focus;
@@ -940,25 +1253,127 @@ function renderQuests() {
   );
 }
 
+let npcRosterOpen = false;
+
+// Filtro de color del sprite según el jefe (para que se vean distintos sin arte propio)
+function bossSpriteFilter(boss, dead) {
+  if (dead) return "grayscale(1) brightness(0.5)";
+  return `hue-rotate(${boss.hue || 0}deg) saturate(1.1)`;
+}
+
+// ---- Modo selección / preparación: compendio de jefes + NPC + ítems ----
+function renderBossSelect() {
+  $("#boss-roster").innerHTML = BOSSES.map((b) => {
+    const info = attrInfo(b.weakness);
+    const chosen = state.selectedBoss === b.id;
+    const defeated = (state.bossDamage[b.id] || 0) >= b.maxHp;
+    return `
+      <article class="boss-pick ${chosen ? "chosen" : ""}" data-boss="${b.id}" style="--c:${info.color}">
+        <div class="boss-thumb">
+          <img src="./assets/pixel-monster.svg" alt="" style="filter:${bossSpriteFilter(b, defeated)}" />
+        </div>
+        <div class="boss-pick-body">
+          <span class="boss-badge">${b.badge}${defeated ? " · derrotado" : ""}</span>
+          <strong>${b.name}</strong>
+          <em>${b.epithet}</em>
+          <span class="weak-chip" style="--c:${info.color}">⚔ Debilidad: ${b.weakness}</span>
+        </div>
+        <span class="boss-pick-mark">${chosen ? "✓" : ""}</span>
+      </article>`;
+  }).join("");
+  $$("[data-boss]").forEach((el) => el.addEventListener("click", () => selectBoss(el.dataset.boss)));
+
+  // NPC de apoyo (elección simple)
+  $("#prep-npc-list").innerHTML = BASIC_NPCS.map((n) => {
+    const info = attrInfo(n.attr);
+    const active = state.selectedNpc === n.attr;
+    return `
+      <button class="npc-chip ${active ? "active" : ""}" data-prep-npc="${n.attr}" type="button" style="--c:${info.color}">
+        <span class="npc-chip-icon" style="color:${info.color}">${n.icon}</span>
+        <span class="npc-chip-name">${n.name}</span>
+        <span class="npc-chip-attr">${n.attr}</span>
+      </button>`;
+  }).join("");
+  $$("[data-prep-npc]").forEach((b) =>
+    b.addEventListener("click", () => {
+      state.selectedNpc = state.selectedNpc === b.dataset.prepNpc ? null : b.dataset.prepNpc;
+      save();
+      render();
+    }),
+  );
+
+  // Ítems a la batalla (buffs equipables; las pociones se usan en combate)
+  const items = Object.entries(CONSUMABLES).filter(([id]) => (state.inventory[id] || 0) > 0);
+  $("#prep-items-pill").textContent = `${state.equippedConsumables.length} ítems`;
+  $("#prep-items").innerHTML = items.length
+    ? items
+        .map(([id, c]) => {
+          const eq = state.equippedConsumables.includes(id);
+          return `
+        <article class="consumable-card ${eq ? "equipped" : ""}">
+          <span class="quest-icon">${c.icon}</span>
+          <div><strong>${c.name}</strong><p>${c.effect}</p><small>Stock: ${state.inventory[id]}</small></div>
+          <button class="mini-button" data-consumable="${id}" type="button">${eq ? "Quitar" : c.cat === "heal" ? "Usar" : "Llevar"}</button>
+        </article>`;
+        })
+        .join("")
+    : `<p class="empty-note">Sin ítems. Completa quests y bosses para conseguirlos.</p>`;
+  $$("[data-consumable]").forEach((b) => b.addEventListener("click", () => toggleConsumable(b.dataset.consumable)));
+
+  const ready = Boolean(state.selectedBoss);
+  $("#start-battle").disabled = !ready;
+  $("#start-battle").textContent = ready ? `⚔ Aceptar contrato · ${activeBoss().name}` : "⚔ Aceptar contrato";
+  $("#select-hint").classList.toggle("hidden", ready);
+}
+
+function selectBoss(id) {
+  state.selectedBoss = id;
+  save();
+  render();
+}
+function startBattle() {
+  if (!state.selectedBoss) return;
+  state.bossMode = "battle";
+  save();
+  render();
+}
+function backToSelect() {
+  state.bossMode = "select";
+  save();
+  render();
+}
+
 function renderBoss() {
+  // alterna entre preparación y batalla
+  const selectMode = state.bossMode !== "battle";
+  $("#boss-select").classList.toggle("hidden", !selectMode);
+  $("#boss-battle").classList.toggle("hidden", selectMode);
+  if (selectMode) {
+    renderBossSelect();
+    return;
+  }
+
   ensureHeroHp();
   const boss = activeBoss();
   const hp = bossHp();
-  $("#boss-art-img").src = boss.art;
-  $("#boss-type").textContent = boss.type;
+  const dead = hp <= 0;
+  $("#boss-sprite").style.filter = bossSpriteFilter(boss, dead);
+  $("#boss-type").textContent = boss.badge;
   $("#boss-name").textContent = boss.name;
   $("#boss-hp-label").textContent = `${fmt(hp)} / ${fmt(boss.maxHp)} PV`;
   $("#boss-hp-bar").style.width = `${(hp / boss.maxHp) * 100}%`;
 
-  // intel
+  // intel — tarjeta compacta única
   const intel = bossIntel();
-  $("#int-tier-pill").textContent = `INT ${totalAttributes().INT ?? 0}`;
-  $("#boss-intel").innerHTML = `<article class="intel-card"><strong>${intel.tier}</strong>${intel.lines.map((l) => `<p>${l}</p>`).join("")}</article>`;
+  $("#boss-intel").innerHTML = `<article class="intel-card"><strong>Intel · ${intel.tier}</strong>${intel.lines.map((l) => `<p>${l}</p>`).join("")}</article>`;
 
-  // NPCs básicos
-  $("#npc-list").innerHTML = BASIC_NPCS.map((n) => {
+  // NPC de apoyo — colapsado al elegido (con "Cambiar") o roster completo
+  const selected = state.selectedNpc ? npcByAttr(state.selectedNpc) : null;
+  const showRoster = npcRosterOpen || !selected;
+  $("#npc-toggle").textContent = showRoster ? (selected ? "Ocultar" : "Elegir") : "Cambiar";
+  $("#npc-toggle").style.visibility = selected ? "visible" : "hidden";
+  const npcCard = (n, active) => {
     const info = attrInfo(n.attr);
-    const active = state.selectedNpc === n.attr;
     return `
       <article class="recruit-card ${active ? "active" : ""}" style="--c:${info.color}">
         <div class="quest-icon" style="color:${info.color}">${n.icon}</div>
@@ -967,10 +1382,18 @@ function renderBoss() {
           <p>${n.effect}</p>
           <small style="color:${info.color}">Atributo: ${n.attr} · ${n.when}</small>
         </div>
-        <button class="mini-button" data-npc="${n.attr}" type="button">${active ? "Activo ✓" : "Elegir"}</button>
+        ${active && !showRoster ? `<span class="pill npc-active-pill">Activo ✓</span>` : `<button class="mini-button" data-npc="${n.attr}" type="button">${active ? "Activo ✓" : "Elegir"}</button>`}
       </article>`;
-  }).join("");
-  $$("[data-npc]").forEach((b) => b.addEventListener("click", () => selectNpc(b.dataset.npc)));
+  };
+  $("#npc-list").innerHTML = showRoster
+    ? BASIC_NPCS.map((n) => npcCard(n, state.selectedNpc === n.attr)).join("")
+    : npcCard(selected, true);
+  $$("[data-npc]").forEach((b) =>
+    b.addEventListener("click", () => {
+      npcRosterOpen = false;
+      selectNpc(b.dataset.npc);
+    }),
+  );
 
   // consumibles de combate (solo buffs equipables; heal se aplica al instante)
   const buffs = Object.entries(CONSUMABLES).filter(([id, c]) => (state.inventory[id] || 0) > 0);
@@ -999,6 +1422,7 @@ function renderBoss() {
   if (state.selectedNpc) bonuses.push(npcByAttr(state.selectedNpc).name);
   state.equippedConsumables.forEach((id) => bonuses.push(CONSUMABLES[id].name));
   $("#active-bonus").textContent = bonuses.length ? bonuses.join(", ") : "—";
+  $("#prep-summary-pill").textContent = `PV ${fmt(state.heroHp)}/${fmt(maxHeroHp())}`;
 
   // battle missions
   $("#damage-potential").textContent = `+${fmt(pendingBattleDamage())} daño acumulado`;
@@ -1116,22 +1540,32 @@ function renderCharacter() {
       </article>`;
   }).join("");
 
-  // equipo por ranura
+  // equipo por ranura (sets con bonus base/completo y umbral)
   $("#equipment-list").innerHTML = EQUIP_SLOTS.map((slot) => {
     const item = state.equipment[slot.id];
     if (!item) {
-      return `<article class="equipment-card empty"><span>▢</span><div><strong>${slot.label}</strong><p>Ranura vacía</p><small>${slot.primary === "ALL" ? "Solo reliquias épicas" : slot.primary}</small></div></article>`;
+      const note = slot.id === "relic" ? "Solo reliquias de expedición" : "Ranura vacía";
+      return `<article class="equipment-card empty"><span>▢</span><div><strong>${slot.label}</strong><p>${note}</p></div></article>`;
     }
+    if (item.slot === "relic") {
+      return `
+        <article class="equipment-card awakened">
+          <span>👑</span>
+          <div><strong>${item.name} <em class="rarity epic">Reliquia</em></strong><p>${slot.label} · +todos los stats</p><small>✓ Trofeo de expedición</small></div>
+        </article>`;
+    }
+    const piece = equipPiece(item);
+    const set = setById(item.set);
     const awakened = isAwakened(item);
-    const r = RARITY[item.rarity];
-    const cond = item.thresholdType === "level" ? `Nivel ${item.threshold}` : `${item.thresholdAttr} ${item.threshold}`;
+    const cond = piece.thr[0] === "level" ? `Nivel ${piece.thr[1]}` : `${piece.thr[1]} ≥ ${piece.thr[2]}`;
+    const bonusTxt = (b) => Object.entries(b).map(([a, n]) => `+${n} ${a}`).join(" ");
     return `
       <article class="equipment-card ${awakened ? "awakened" : ""}">
-        <span>${item.slot === "relic" ? "👑" : "⚔"}</span>
+        <span>⚔</span>
         <div>
-          <strong>${item.name} <em class="rarity ${item.rarity}">${r.label}</em></strong>
-          <p>${slot.label}</p>
-          <small>${awakened ? "✓ Despertado" : `Umbral: ${cond}`}</small>
+          <strong>${item.name} <em class="rarity ${awakened ? "epic" : "common"}">${set.name}</em></strong>
+          <p>${slot.label} · base ${bonusTxt(piece.base)}</p>
+          <small>${awakened ? `✓ Despertado: ${bonusTxt(piece.full)}` : `Umbral: ${cond} → ${bonusTxt(piece.full)}`}</small>
         </div>
       </article>`;
   }).join("");
@@ -1163,7 +1597,7 @@ function topAttrLabel(totals) {
   const top = ATTR_IDS.reduce((best, id) => (totals[id] > totals[best] ? id : best), ATTR_IDS[0]);
   const avg = ATTR_IDS.reduce((s, id) => s + totals[id], 0) / ATTR_IDS.length;
   if (totals[top] - avg < 4) return "Equilibrado";
-  return { STR: "Guerrero", INT: "Erudito", VIT: "Centinela", DIS: "Asceta", FOC: "Místico" }[top];
+  return { STR: "Guerrero", INT: "Erudito", VIT: "Centinela", DIS: "Asceta", SOC: "Diplomático" }[top];
 }
 
 function renderArchive() {
@@ -1233,6 +1667,19 @@ $("#login-form").addEventListener("submit", (e) => {
 $("#attack-button").addEventListener("click", attackBoss);
 $("#end-day-button").addEventListener("click", endOfDayAttack);
 
+$("#npc-toggle").addEventListener("click", () => {
+  npcRosterOpen = !npcRosterOpen;
+  render();
+});
+
+$("#start-battle").addEventListener("click", startBattle);
+$("#back-to-select").addEventListener("click", backToSelect);
+
+$("#cp-close").addEventListener("click", closeCombatPop);
+$("#combat-pop").addEventListener("click", (e) => {
+  if (e.target.id === "combat-pop") closeCombatPop();
+});
+
 $$(".tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     $$(".tab").forEach((t) => t.classList.remove("active"));
@@ -1256,5 +1703,11 @@ if (localStorage.getItem(STORAGE_KEY)) {
   $("#login-screen").classList.remove("active");
   $("#app-screen").classList.add("active");
 }
+
+// el primer gesto del usuario desbloquea el audio de la alarma
+window.addEventListener("pointerdown", unlockAudio, { once: true });
+
+// tick de los temporizadores cada segundo
+setInterval(tickTimers, 1000);
 
 render();

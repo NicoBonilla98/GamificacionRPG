@@ -1252,6 +1252,78 @@ input:focus {
   border-left: 3px solid var(--c, var(--line));
 }
 
+/* ---- Temporizador de misiones ---- */
+.timer-panel {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(126, 203, 142, 0.25);
+  border-radius: 10px;
+  background: rgba(8, 13, 10, 0.4);
+}
+.timer-panel.running {
+  border-color: rgba(242, 204, 69, 0.45);
+}
+.timer-panel.done {
+  border-color: rgba(126, 203, 142, 0.7);
+  background: rgba(16, 40, 26, 0.5);
+}
+.timer-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.timer-head strong {
+  font-family: var(--font-mono, "Courier New", monospace);
+  font-size: 1.7rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.timer-panel.running .timer-head strong {
+  color: var(--gold);
+}
+.timer-panel.done .timer-head strong {
+  color: var(--green);
+}
+.timer-head span {
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.timer-track {
+  height: 8px;
+  border-radius: 999px;
+  background: #100c0a;
+  overflow: hidden;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+.timer-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  transition: width 0.4s linear;
+}
+.timer-actions {
+  display: flex;
+  gap: 8px;
+}
+.timer-actions .mini-button {
+  flex: 1;
+}
+.timer-actions .mini-button.ghost {
+  flex: 0 0 auto;
+  padding: 0 16px;
+  border-color: rgba(255, 255, 255, 0.18);
+  color: var(--muted);
+  background: transparent;
+}
+
 .boss-intel,
 .consumable-list {
   display: grid;
@@ -1664,4 +1736,400 @@ input:focus {
 .attack-button:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* ===================== Boss — diseño simple ===================== */
+.boss-stage-compact {
+  position: relative;
+  height: 220px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(242, 204, 69, 0.22);
+  background:
+    linear-gradient(180deg, rgba(20, 31, 43, 0.86), rgba(8, 8, 12, 0.96)),
+    repeating-linear-gradient(0deg, transparent 0 7px, rgba(255, 255, 255, 0.025) 7px 8px),
+    repeating-linear-gradient(90deg, transparent 0 7px, rgba(255, 255, 255, 0.025) 7px 8px);
+  box-shadow: inset 0 0 36px rgba(0, 0, 0, 0.62);
+}
+.boss-stage-compact .stage-tag {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  color: rgba(255, 246, 237, 0.55);
+  font-family: "Courier New", monospace;
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.boss-monster-sprite {
+  width: 132px;
+  height: 132px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 12px 0 rgba(0, 0, 0, 0.28));
+  transition: filter 400ms ease;
+  z-index: 1;
+}
+.boss-stage-compact .stage-shadow {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 18px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.48);
+  filter: blur(5px);
+}
+.boss-headline {
+  margin-top: 14px;
+}
+.boss-type-sm {
+  display: block;
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.boss-headline h3 {
+  margin-top: 4px;
+  font-size: 1.5rem;
+  color: var(--gold);
+  text-shadow: 0 2px 0 #4c3511;
+}
+.hp-track.boss-hp {
+  margin-top: 12px;
+}
+
+.link-button {
+  border: 0;
+  background: none;
+  color: var(--gold);
+  font-family: system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.npc-active-pill {
+  background: rgba(126, 203, 142, 0.16);
+  color: var(--green);
+  border: 1px solid rgba(126, 203, 142, 0.4);
+}
+#boss-intel {
+  margin-top: 16px;
+}
+
+/* Preparación colapsable */
+.prep-details {
+  margin-top: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+.prep-details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--ink);
+  font-family: system-ui, sans-serif;
+  font-weight: 800;
+}
+.prep-details > summary::-webkit-details-marker {
+  display: none;
+}
+.prep-details > summary::after {
+  content: "▾";
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform 200ms ease;
+}
+.prep-details[open] > summary::after {
+  transform: rotate(180deg);
+}
+.prep-details > summary > span:first-child {
+  flex: 1;
+}
+.prep-body {
+  padding: 0 16px 16px;
+}
+.section-heading.mini {
+  margin: 8px 0 12px;
+}
+.section-heading.mini h3 {
+  font-size: 1.1rem;
+}
+
+/* ===================== Pop-up de combate ===================== */
+.cp-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(8, 6, 5, 0.74);
+  backdrop-filter: blur(3px);
+  animation: cp-fade 200ms ease;
+}
+.cp-backdrop.hidden {
+  display: none;
+}
+.cp-card {
+  width: min(100%, 384px);
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(242, 204, 69, 0.32);
+  background: linear-gradient(145deg, rgba(58, 50, 46, 0.95), rgba(24, 18, 16, 0.97));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(242, 204, 69, 0.12);
+}
+.cp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.cp-eyebrow {
+  color: var(--gold);
+  font-family: system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cp-dmg-label {
+  color: var(--rose);
+  font-family: system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 0.85rem;
+}
+.cp-card .battle-stage {
+  margin-top: 0;
+  height: 200px;
+}
+.cp-hpwrap {
+  margin-top: 12px;
+}
+.cp-hprow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.cp-hprow strong {
+  color: var(--ink);
+  font-family: system-ui, sans-serif;
+  font-size: 0.82rem;
+}
+.cp-hprow span {
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.78rem;
+}
+.cp-card .hp-track {
+  height: 14px;
+}
+.cp-card .primary-button {
+  margin-top: 14px;
+  min-height: 54px;
+}
+@keyframes cp-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ===================== Compendio de jefes (selección) ===================== */
+.compendium-head {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.compendium-head .eyebrow {
+  display: block;
+  color: var(--gold-deep);
+  font-family: system-ui, sans-serif;
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.compendium-head h3 {
+  margin-top: 6px;
+  font-size: 1.9rem;
+  color: var(--ink);
+}
+.compendium-head h3::after {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 2px;
+  margin: 10px auto 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.boss-roster {
+  display: grid;
+  gap: 12px;
+}
+.boss-pick {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid var(--c, var(--line));
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(58, 50, 46, 0.9), rgba(24, 18, 16, 0.95));
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 120ms ease;
+}
+.boss-pick:active {
+  transform: scale(0.99);
+}
+.boss-pick.chosen {
+  border-color: var(--c, var(--gold));
+  box-shadow: 0 0 0 1px var(--c, var(--gold)), 0 0 22px color-mix(in srgb, var(--c, var(--gold)) 22%, transparent);
+}
+.boss-thumb {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--c) 26%, transparent), transparent 70%),
+    #0c0b10;
+  overflow: hidden;
+}
+.boss-thumb img {
+  width: 46px;
+  height: 46px;
+  image-rendering: pixelated;
+}
+.boss-pick-body {
+  min-width: 0;
+}
+.boss-badge {
+  display: inline-block;
+  color: var(--gold-deep);
+  font-family: system-ui, sans-serif;
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.boss-pick-body strong {
+  display: block;
+  margin: 2px 0;
+  font-size: 1.15rem;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.boss-pick-body em {
+  display: block;
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.weak-chip {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 3px 9px;
+  border: 1px solid var(--c, var(--line));
+  border-radius: 6px;
+  color: var(--c, var(--gold));
+  font-family: system-ui, sans-serif;
+  font-size: 0.66rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.boss-pick-mark {
+  color: var(--c, var(--gold));
+  font-size: 1.3rem;
+  font-weight: 900;
+  width: 18px;
+  text-align: center;
+}
+
+/* NPC chips compactos en selección */
+.prep-npc-list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.npc-chip {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 10px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+.npc-chip.active {
+  border-color: var(--c, var(--gold));
+  background: color-mix(in srgb, var(--c, var(--gold)) 16%, transparent);
+}
+.npc-chip-icon {
+  font-size: 1.25rem;
+}
+.npc-chip-name {
+  color: var(--ink);
+  font-family: system-ui, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.1;
+}
+.npc-chip-attr {
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.58rem;
+  font-weight: 900;
+}
+
+.select-hint {
+  margin-top: 10px;
+  text-align: center;
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.78rem;
+}
+#start-battle:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.back-btn {
+  display: inline-flex;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 360px) {
+  .boss-thumb {
+    width: 54px;
+    height: 54px;
+  }
+  .npc-chip-name {
+    font-size: 0.56rem;
+  }
 }

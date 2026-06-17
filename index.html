@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>Hero's Ledger</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=7" />
   </head>
   <body>
     <main class="phone-shell" aria-live="polite">
@@ -82,52 +82,70 @@
 
         <!-- ---------- BOSS ---------- -->
         <section id="boss-view" class="view">
-          <div id="boss-mode-prep" class="boss-mode">
-            <article class="boss-card">
-              <div class="boss-art"><img id="boss-art-img" src="./assets/void-dragon.svg" alt="" /></div>
-              <span id="boss-type" class="boss-type">Boss Genérico</span>
-              <h3 id="boss-name">Malakor el Tocado por el Vacío</h3>
-              <div class="hp-track">
-                <span id="boss-hp-bar"></span>
-                <strong id="boss-hp-label">0 / 0 PV</strong>
-              </div>
-            </article>
 
-            <div class="section-heading"><h3>Inteligencia del Boss</h3><span id="int-tier-pill" class="pill">INT 0</span></div>
-            <div id="boss-intel" class="boss-intel"></div>
-
-            <div class="section-heading"><h3>NPC de Apoyo</h3><span id="npc-roster-pill" class="pill">Roster Básico</span></div>
-            <div id="npc-list" class="recruitment-list"></div>
-
-            <div class="section-heading"><h3>Consumibles de Combate</h3><span id="consumable-pill" class="pill">0 equipados</span></div>
-            <div id="combat-consumables" class="consumable-list"></div>
-
-            <div class="prep-summary">
-              <div><span class="level-label">PV del héroe</span><strong id="hero-hp-label">0 / 0</strong></div>
-              <div><span class="level-label">Daño estimado / misión</span><strong id="dmg-estimate">+0</strong></div>
-              <div><span class="level-label">Bonus activos</span><strong id="active-bonus">—</strong></div>
+          <!-- MODO SELECCIÓN / PREPARACIÓN -->
+          <div id="boss-select">
+            <div class="compendium-head">
+              <span class="eyebrow">Gremio de Villanos · Hunter's Compendium</span>
+              <h3>Objetivos de Recompensa</h3>
             </div>
+            <div id="boss-roster" class="boss-roster"></div>
+
+            <div class="section-heading"><h3>NPC de Apoyo</h3></div>
+            <div id="prep-npc-list" class="prep-npc-list"></div>
+
+            <div class="section-heading"><h3>Ítems a la batalla</h3><span id="prep-items-pill" class="pill">0 ítems</span></div>
+            <div id="prep-items" class="consumable-list"></div>
+
+            <button id="start-battle" class="primary-button" type="button">⚔ Aceptar contrato</button>
+            <p id="select-hint" class="select-hint">Elige un objetivo para iniciar.</p>
           </div>
+
+          <!-- MODO BATALLA -->
+          <div id="boss-battle" class="hidden">
+          <button id="back-to-select" class="link-button back-btn" type="button">← Objetivos de recompensa</button>
+          <div class="boss-stage-compact">
+            <span class="stage-tag">Boss · Pixel</span>
+            <img id="boss-sprite" class="boss-monster-sprite" src="./assets/pixel-monster.svg" alt="" />
+            <div class="stage-shadow"></div>
+          </div>
+          <div class="boss-headline">
+            <span id="boss-type" class="boss-type-sm">Boss Genérico</span>
+            <h3 id="boss-name">Malakor el Tocado por el Vacío</h3>
+          </div>
+          <div class="hp-track boss-hp">
+            <span id="boss-hp-bar"></span>
+            <strong id="boss-hp-label">0 / 0 PV</strong>
+          </div>
+
+          <div id="boss-intel" class="boss-intel"></div>
+
+          <div class="section-heading">
+            <h3>NPC de Apoyo</h3>
+            <button id="npc-toggle" class="link-button" type="button">Cambiar</button>
+          </div>
+          <div id="npc-list" class="recruitment-list"></div>
 
           <div class="section-heading"><h3>Misiones de Combate</h3><span id="damage-potential">+0 daño acumulado</span></div>
           <div id="battle-list" class="battle-list"></div>
 
-          <div id="battle-stage" class="battle-stage" aria-label="Escena de combate pixel art">
-            <div class="stage-label">Pixel Battle</div>
-            <div class="sprite-wrap hero-wrap">
-              <img class="pixel-sprite hero-sprite" src="./assets/pixel-hero.svg" alt="" />
-              <span class="power-aura"></span>
+          <details id="prep-details" class="prep-details">
+            <summary><span>Preparación · consumibles y resumen</span><span id="prep-summary-pill" class="pill">PV 0/0</span></summary>
+            <div class="prep-body">
+              <div class="section-heading mini"><h3>Consumibles de Combate</h3><span id="consumable-pill" class="pill">0 equipados</span></div>
+              <div id="combat-consumables" class="consumable-list"></div>
+              <div class="prep-summary">
+                <div><span class="level-label">PV del héroe</span><strong id="hero-hp-label">0 / 0</strong></div>
+                <div><span class="level-label">Daño estimado / misión</span><strong id="dmg-estimate">+0</strong></div>
+                <div><span class="level-label">Bonus activos</span><strong id="active-bonus">—</strong></div>
+              </div>
             </div>
-            <span class="slash-effect"></span>
-            <span class="impact-burst"></span>
-            <div class="sprite-wrap monster-wrap">
-              <img class="pixel-sprite monster-sprite" src="./assets/pixel-monster.svg" alt="" />
-            </div>
-          </div>
+          </details>
 
           <button id="attack-button" class="primary-button attack-button" type="button">⚔ Desatar ataque</button>
-          <button id="end-day-button" class="ghost-button" type="button">Simular cierre del día (ataque nocturno)</button>
+          <button id="end-day-button" class="ghost-button" type="button">Cierre del día (ataque nocturno)</button>
           <p id="rest-note" class="rest-note hidden"></p>
+          </div>
         </section>
 
         <!-- ---------- EXPEDITION ---------- -->
@@ -217,10 +235,37 @@
         </nav>
       </section>
 
+      <!-- pop-up de combate (duelo al atacar) -->
+      <div id="combat-pop" class="cp-backdrop hidden">
+        <div class="cp-card">
+          <div class="cp-head">
+            <span class="cp-eyebrow">¡Ataque desatado!</span>
+            <span id="cp-dmg-label" class="cp-dmg-label">−0 PV</span>
+          </div>
+          <div id="cp-stage" class="battle-stage">
+            <div class="stage-label">Pixel Battle</div>
+            <div class="sprite-wrap hero-wrap">
+              <img class="pixel-sprite hero-sprite" src="./assets/pixel-hero.svg" alt="" />
+              <span class="power-aura"></span>
+            </div>
+            <span class="slash-effect"></span>
+            <span class="impact-burst"></span>
+            <div class="sprite-wrap monster-wrap">
+              <img class="pixel-sprite monster-sprite" src="./assets/pixel-monster.svg" alt="" />
+            </div>
+          </div>
+          <div class="cp-hpwrap">
+            <div class="cp-hprow"><strong id="cp-boss-name">Malakor</strong><span id="cp-boss-hp">0 / 0 PV</span></div>
+            <div class="hp-track"><span id="cp-hp-bar"></span></div>
+          </div>
+          <button id="cp-close" class="primary-button" type="button">Continuar</button>
+        </div>
+      </div>
+
       <!-- pop notifications -->
       <div id="toast-stack" class="toast-stack" aria-live="assertive"></div>
     </main>
 
-    <script src="./app.js"></script>
+    <script src="./app.js?v=7"></script>
   </body>
 </html>
