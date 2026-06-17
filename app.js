@@ -165,6 +165,38 @@ const BASIC_NPCS = [
 const npcByAttr = (attr) => BASIC_NPCS.find((n) => n.attr === attr);
 
 /* ---------------------------------------------------------------------------
+   8.2 TUTORIAL — El Registro en el Gremio de Bremont
+--------------------------------------------------------------------------- */
+// 5 encargos fáciles, uno por atributo (reutilizan el repositorio).
+const TUTORIAL_QUESTS = ["str_f1", "int_f1", "vit_f1", "dis_f1", "soc_f1"];
+
+// Boss del tutorial: Lobo Armado. 40 HP; el NPC tutorial amplifica a 8 dmg/misión.
+const TUTORIAL_BOSS = {
+  id: "lobo_armado", name: "Lobo Armado", epithet: "La bestia que no debería llevar armadura", type: "Bestia",
+  badge: "Bestia", weakness: null, npc: "tutorial", level: 1, maxHp: 40, healPct: 0, hue: 35,
+  desc: "Un lobo del bosque cercano que, inexplicablemente, viste piezas de armadura. ¿Quién lo armó?",
+};
+const TUTORIAL_NPC = { name: "Reno", role: "Cazador del Gremio", icon: "🏹", effect: "Amplifica tu daño a 8 por misión completada." };
+
+const GUILD_DIALOGUES = {
+  intro: [
+    { who: "Maestro del Gremio", text: "Bienvenido a Bremont, prospecto. Un pueblo tranquilo en la ruta comercial… o lo era hasta hace poco." },
+    { who: "Maestro del Gremio", text: "Esta es tu ficha de aventurero. Estos cinco rasgos — Fuerza, Inteligencia, Vitalidad, Disciplina y Sociabilidad — son tus atributos. Crecen con lo que haces en la vida real." },
+    { who: "Maestro del Gremio", text: "El gremio paga por encargos cumplidos. Cada encargo es una misión: complétala en tu día y tu héroe se fortalece. Empieza con estos cinco." },
+  ],
+  hook: [
+    { who: "Maestro del Gremio", text: "Buen trabajo con los encargos. Pero hay algo más… los pastores reportan ovejas desaparecidas y ruidos extraños en el bosque por las noches." },
+    { who: "Maestro del Gremio", text: "Un lobo ha estado merodeando la ruta. Dicen que lleva… armadura. Suena absurdo, lo sé. Tu primera misión oficial: cázalo." },
+    { who: "Reno (Cazador)", text: "Te acompaño en esta. Marca tus encargos como ataques y yo amplifico tu golpe. Entre los dos lo derribamos. ¡Vamos!" },
+  ],
+  victory: [
+    { who: "Reno (Cazador)", text: "¡Lo logramos! Pero mira esto… entre las placas de su armadura hay un emblema. Nunca había visto esa marca." },
+    { who: "Maestro del Gremio", text: "Déjame ver… No pertenece a ninguna casa conocida. Alguien armó a esa bestia a propósito, y quiero saber quién." },
+    { who: "Maestro del Gremio", text: "Tu siguiente encargo será una escolta a la capital — pero guarda ese emblema. Acabas de abrir un misterio mayor. El gremio cuenta contigo, aventurero." },
+  ],
+};
+
+/* ---------------------------------------------------------------------------
    6. SETS DE EQUIPO — 4 sets temáticos, 5 piezas cada uno (tablas 19-22).
    Sin bonus de set. Cada pieza: bonus base (siempre) + bonus completo (umbral).
    La Reliquia es exclusiva de expediciones.
@@ -297,6 +329,8 @@ function freshState() {
     focusAttr: null,
     cooldowns: {}, // questId -> fecha de expiración
     lastReset: null,
+    // tutorial (registro en el gremio de Bremont)
+    tutorial: { active: true, step: "intro", seenIntro: false }, // step: intro|quests|boss|done
     // boss
     bossMode: "select", // "select" (preparación) | "battle"
     selectedBoss: null, // bossId elegido
@@ -406,6 +440,13 @@ function generateDailyQuests() {
 }
 
 function ensureDailyReset() {
+  // Durante el tutorial las misiones son fijas (5 encargos del gremio), sin rotación.
+  if (isTutorial()) {
+    if (!state.dailyQuests.length || state.dailyQuests[0] !== TUTORIAL_QUESTS[0]) {
+      state.dailyQuests = [...TUTORIAL_QUESTS];
+    }
+    return;
+  }
   const t = today();
   if (state.lastReset === t && state.dailyQuests.length) return;
 
@@ -773,8 +814,8 @@ function completeQuest(id) {
   if (state.completedToday.includes(id)) return;
   const q = questById(id);
   if (!q) return;
-  // Las misiones de tiempo requieren cumplir el temporizador antes de reclamar.
-  if (isTimed(q) && !timerDone(id)) {
+  // Las misiones de tiempo requieren cumplir el temporizador (excepto en el tutorial).
+  if (!isTutorial() && isTimed(q) && !timerDone(id)) {
     toast(`Inicia y completa el temporizador de "${q.name}" primero.`, "#f2cc45", "⏳");
     return;
   }
@@ -793,16 +834,25 @@ function completeQuest(id) {
   state.activityLog = state.activityLog.slice(0, 40);
 
   // chance de drop de consumible (Poción de Hierba — drop frecuente de quests)
-  if (Math.random() < 0.35) addConsumable("herb", 1, true);
+  if (!isTutorial() && Math.random() < 0.35) addConsumable("herb", 1, true);
 
   save();
   render();
+
+  // Tutorial: al completar los 5 encargos, avanza al gancho narrativo.
+  if (isTutorial() && state.tutorial.step === "quests" && TUTORIAL_QUESTS.every((qid) => state.completedToday.includes(qid))) {
+    onTutorialQuestsComplete();
+  }
 }
 
 /* =========================================================================
    4. SISTEMA DE BOSSES
    ========================================================================= */
+function isTutorial() {
+  return Boolean(state.tutorial?.active);
+}
 function activeBoss() {
+  if (isTutorial()) return TUTORIAL_BOSS;
   return bossById(state.selectedBoss) || BOSSES[0];
 }
 function bossDamageDone() {
@@ -829,6 +879,8 @@ function bossIntel() {
 
 // daño de una misión de combate (XP base × multiplicadores)
 function questBattleDamage(q) {
+  // Tutorial: el cazador Reno amplifica el daño a 8 por misión.
+  if (isTutorial()) return 8;
   let dmg = q.xp; // el XP de la misión define el daño base (10/20/50/100)
   // el atributo de la misión (valor efectivo con multiplicador de nivel) amplifica
   dmg *= 1 + combatAttr(q.attr) * 0.01;
@@ -896,20 +948,23 @@ function attackBoss() {
   state.bossDamage[boss.id] = Math.min((state.bossDamage[boss.id] || 0) + dmg, boss.maxHp);
   state.battleDone = [];
 
-  if (state.bossDamage[boss.id] >= boss.maxHp) {
+  const killed = state.bossDamage[boss.id] >= boss.maxHp;
+  // si es la victoria del tutorial, el diálogo de Reno reemplaza al pop de combate
+  const tutorialVictory = killed && isTutorial();
+  if (killed) {
     defeatBoss();
   } else {
     bossCounterAttack();
   }
   save();
   render();
-  openCombatPop(dmg);
+  if (!tutorialVictory) openCombatPop(dmg);
 }
 
 function bossCounterAttack() {
   ensureHeroHp();
-  // 4.1 daño del boss al héroe ≈ HP máximo × 0.35 por día, repartido por golpe.
-  let hit = Math.max(1, Math.round(maxHeroHp() * 0.12));
+  // Tutorial: el Lobo Armado hace 2 de daño por golpe.
+  let hit = isTutorial() ? 2 : Math.max(1, Math.round(maxHeroHp() * 0.12));
   state.heroHp = Math.max(0, state.heroHp - hit);
   // NPC Sanador (VIT) cura tras el contraataque
   if (state.selectedNpc === "VIT") {
@@ -920,6 +975,12 @@ function bossCounterAttack() {
 
 function defeatBoss() {
   const boss = activeBoss();
+  // Tutorial: el Lobo Armado deja el emblema y abre la Expedición 1.
+  if (isTutorial()) {
+    state.bossesDefeated += 1;
+    finishTutorialCombat();
+    return;
+  }
   state.bossesDefeated += 1;
   state.bossesByType.generic += 1;
   toast(`¡${boss.name} derrotado!`, "#d43b4a", "🏆");
@@ -1146,6 +1207,112 @@ function closeCombatPop() {
 }
 
 /* =========================================================================
+   TUTORIAL — diálogos del gremio y flujo de Bremont
+   ========================================================================= */
+let dialogueBeats = [];
+let dialogueIndex = 0;
+let dialogueOnDone = null;
+
+function showDialogue(beats, onDone) {
+  dialogueBeats = beats;
+  dialogueIndex = 0;
+  dialogueOnDone = onDone || null;
+  $("#gd-skip").style.display = isTutorial() ? "" : "none";
+  $("#guild-dialogue").classList.remove("hidden");
+  renderDialogueBeat();
+}
+function renderDialogueBeat() {
+  const beat = dialogueBeats[dialogueIndex];
+  if (!beat) return;
+  const reno = /reno/i.test(beat.who);
+  $("#gd-portrait").textContent = reno ? "🏹" : "🧙";
+  $("#gd-who").textContent = beat.who;
+  $("#gd-text").textContent = beat.text;
+  $("#gd-progress").textContent = `${dialogueIndex + 1}/${dialogueBeats.length}`;
+  $("#gd-next").textContent = dialogueIndex === dialogueBeats.length - 1 ? "Entendido" : "Continuar";
+}
+function advanceDialogue() {
+  if (dialogueIndex < dialogueBeats.length - 1) {
+    dialogueIndex += 1;
+    renderDialogueBeat();
+    return;
+  }
+  $("#guild-dialogue").classList.add("hidden");
+  const cb = dialogueOnDone;
+  dialogueOnDone = null;
+  if (cb) cb();
+}
+
+// Inicia el tutorial al crear un héroe nuevo.
+function startTutorial() {
+  state.tutorial = { active: true, step: "intro", seenIntro: false };
+  state.dailyQuests = [...TUTORIAL_QUESTS];
+  state.completedToday = [];
+  state.selectedNpc = "tutorial";
+  state.bossMode = "battle";
+  save();
+  showDialogue(GUILD_DIALOGUES.intro, () => {
+    state.tutorial.seenIntro = true;
+    state.tutorial.step = "quests";
+    save();
+    goToView("quests-view");
+    render();
+  });
+}
+
+// Tras completar los 5 encargos: gancho narrativo y paso al boss.
+function onTutorialQuestsComplete() {
+  if (state.tutorial.step !== "quests") return;
+  state.tutorial.step = "boss";
+  save();
+  showDialogue(GUILD_DIALOGUES.hook, () => {
+    goToView("boss-view");
+    render();
+  });
+}
+
+// Tras derrotar al Lobo Armado: emblema y fin del tutorial.
+function finishTutorialCombat() {
+  state.tutorial.step = "victory";
+  save();
+  closeCombatPop();
+  showDialogue(GUILD_DIALOGUES.victory, () => {
+    endTutorial();
+  });
+}
+
+function endTutorial() {
+  state.tutorial = { active: false, step: "done", seenIntro: true };
+  // El emblema desconocido queda como recuerdo en el Archivo del Héroe.
+  if (!state.relics.find((r) => r.arc === "emblema")) {
+    state.relics.push({ arc: "emblema", name: "Emblema Desconocido", lore: "Hallado en la armadura del Lobo Armado. El inicio del misterio de los animales armados.", date: today() });
+  }
+  state.titles.push("Prospecto del Gremio");
+  // arranca el juego normal: misiones diarias y selección de jefe
+  state.dailyQuests = [];
+  state.completedToday = [];
+  state.selectedNpc = null;
+  state.bossMode = "select";
+  state.bossDamage = {};
+  ensureHeroHp();
+  state.heroHp = maxHeroHp();
+  save();
+  toast("Tutorial completado · Expedición 1 desbloqueada", "#f2cc45", "🎉");
+  goToView("quests-view");
+  render();
+}
+
+function skipTutorial() {
+  $("#guild-dialogue").classList.add("hidden");
+  endTutorial();
+}
+
+function goToView(viewId) {
+  $$(".tab").forEach((t) => t.classList.toggle("active", t.dataset.view === viewId));
+  $$(".view").forEach((v) => v.classList.toggle("active", v.id === viewId));
+}
+
+/* =========================================================================
    RENDER
    ========================================================================= */
 const fmt = (n) => new Intl.NumberFormat("es-ES").format(Math.round(n));
@@ -1203,12 +1370,26 @@ function renderQuests() {
   $("#streak-char-mult").textContent = `×${streak.char.toFixed(1)} XP`;
   $("#streak-attr-mult").textContent = `×${streak.attr.toFixed(1)} ATR`;
 
-  // focus selector
-  $("#focus-options").innerHTML =
-    `<button class="focus-pill ${!state.focusAttr ? "active" : ""}" data-focus="none">Libre</button>` +
-    ATTRIBUTES.map(
-      (a) => `<button class="focus-pill ${state.focusAttr === a.id ? "active" : ""}" data-focus="${a.id}" style="--c:${a.color}">${a.id}</button>`,
-    ).join("");
+  const focusBar = document.querySelector(".focus-bar");
+  if (isTutorial()) {
+    // Durante el tutorial: sin enfoque; banner del gremio.
+    const doneN = TUTORIAL_QUESTS.filter((qid) => state.completedToday.includes(qid)).length;
+    focusBar.innerHTML = `
+      <div class="tutorial-banner">
+        <span class="tb-tag">🛡 Gremio de Bremont · Tutorial</span>
+        <strong>Encargos del gremio</strong>
+        <p>Completa los 5 encargos (uno por atributo) para registrarte como aventurero. ${doneN}/5 cumplidos.</p>
+      </div>`;
+  } else {
+    focusBar.innerHTML = `
+      <span class="level-label">Enfoque del día</span>
+      <div id="focus-options" class="focus-options"></div>`;
+    $("#focus-options").innerHTML =
+      `<button class="focus-pill ${!state.focusAttr ? "active" : ""}" data-focus="none">Libre</button>` +
+      ATTRIBUTES.map(
+        (a) => `<button class="focus-pill ${state.focusAttr === a.id ? "active" : ""}" data-focus="${a.id}" style="--c:${a.color}">${a.id}</button>`,
+      ).join("");
+  }
 
   const pending = state.dailyQuests.filter((id) => !state.completedToday.includes(id)).length;
   $("#pending-count").textContent = `${pending} pendientes`;
@@ -1219,7 +1400,7 @@ function renderQuests() {
       if (!q) return "";
       const done = state.completedToday.includes(id);
       const info = attrInfo(q.attr);
-      const timed = isTimed(q);
+      const timed = isTimed(q) && !isTutorial();
       const ready = !timed || timerDone(id);
       return `
         <article class="quest-card ${done ? "completed" : ""}" style="--c:${info.color}">
@@ -1344,10 +1525,14 @@ function backToSelect() {
 }
 
 function renderBoss() {
-  // alterna entre preparación y batalla
-  const selectMode = state.bossMode !== "battle";
+  const tut = isTutorial();
+  // alterna entre preparación y batalla (durante el tutorial siempre batalla)
+  const selectMode = !tut && state.bossMode !== "battle";
   $("#boss-select").classList.toggle("hidden", !selectMode);
   $("#boss-battle").classList.toggle("hidden", selectMode);
+  // en tutorial: sin compendio, sin ataque nocturno
+  $("#back-to-select").style.display = tut ? "none" : "";
+  $("#end-day-button").style.display = tut ? "none" : "";
   if (selectMode) {
     renderBossSelect();
     return;
@@ -1362,38 +1547,72 @@ function renderBoss() {
   $("#boss-name").textContent = boss.name;
   $("#boss-hp-label").textContent = `${fmt(hp)} / ${fmt(boss.maxHp)} PV`;
   $("#boss-hp-bar").style.width = `${(hp / boss.maxHp) * 100}%`;
+  // en tutorial no hay consumibles/preparación
+  $("#prep-details").style.display = tut ? "none" : "";
+
+  // tutorial: el boss está bloqueado hasta completar los 5 encargos
+  if (tut && state.tutorial.step !== "boss") {
+    $("#boss-intel").innerHTML = `<article class="intel-card"><strong>Encargo bloqueado 🔒</strong><p>Completa los 5 encargos del gremio en la pestaña <b>Quests</b>. Entonces el maestro te asignará la caza del Lobo Armado.</p></article>`;
+    $("#npc-list").innerHTML = "";
+    $("#npc-toggle").style.visibility = "hidden";
+    $("#battle-list").innerHTML = `<p class="empty-note">Disponible tras completar los encargos del gremio.</p>`;
+    $("#damage-potential").textContent = "";
+    $("#attack-button").disabled = true;
+    $("#attack-button").textContent = "Completa los encargos primero";
+    $("#rest-note").classList.add("hidden");
+    return;
+  }
 
   // intel — tarjeta compacta única
-  const intel = bossIntel();
-  $("#boss-intel").innerHTML = `<article class="intel-card"><strong>Intel · ${intel.tier}</strong>${intel.lines.map((l) => `<p>${l}</p>`).join("")}</article>`;
+  if (tut) {
+    $("#boss-intel").innerHTML = `<article class="intel-card"><strong>Primer encargo del gremio</strong><p>${boss.desc}</p></article>`;
+  } else {
+    const intel = bossIntel();
+    $("#boss-intel").innerHTML = `<article class="intel-card"><strong>Intel · ${intel.tier}</strong>${intel.lines.map((l) => `<p>${l}</p>`).join("")}</article>`;
+  }
 
-  // NPC de apoyo — colapsado al elegido (con "Cambiar") o roster completo
-  const selected = state.selectedNpc ? npcByAttr(state.selectedNpc) : null;
-  const showRoster = npcRosterOpen || !selected;
-  $("#npc-toggle").textContent = showRoster ? (selected ? "Ocultar" : "Elegir") : "Cambiar";
-  $("#npc-toggle").style.visibility = selected ? "visible" : "hidden";
-  const npcCard = (n, active) => {
-    const info = attrInfo(n.attr);
-    return `
-      <article class="recruit-card ${active ? "active" : ""}" style="--c:${info.color}">
-        <div class="quest-icon" style="color:${info.color}">${n.icon}</div>
+  // NPC de apoyo
+  if (tut) {
+    // tutorial: NPC fijo (Reno), sin selección
+    $("#npc-toggle").style.visibility = "hidden";
+    $("#npc-list").innerHTML = `
+      <article class="recruit-card active" style="--c:#e8923a">
+        <div class="quest-icon" style="color:#e8923a">${TUTORIAL_NPC.icon}</div>
         <div>
-          <strong>${n.name}</strong>
-          <p>${n.effect}</p>
-          <small style="color:${info.color}">Atributo: ${n.attr} · ${n.when}</small>
+          <strong>${TUTORIAL_NPC.name}</strong>
+          <p>${TUTORIAL_NPC.effect}</p>
+          <small style="color:#e8923a">${TUTORIAL_NPC.role}</small>
         </div>
-        ${active && !showRoster ? `<span class="pill npc-active-pill">Activo ✓</span>` : `<button class="mini-button" data-npc="${n.attr}" type="button">${active ? "Activo ✓" : "Elegir"}</button>`}
+        <span class="pill npc-active-pill">Activo ✓</span>
       </article>`;
-  };
-  $("#npc-list").innerHTML = showRoster
-    ? BASIC_NPCS.map((n) => npcCard(n, state.selectedNpc === n.attr)).join("")
-    : npcCard(selected, true);
-  $$("[data-npc]").forEach((b) =>
-    b.addEventListener("click", () => {
-      npcRosterOpen = false;
-      selectNpc(b.dataset.npc);
-    }),
-  );
+  } else {
+    const selected = state.selectedNpc ? npcByAttr(state.selectedNpc) : null;
+    const showRoster = npcRosterOpen || !selected;
+    $("#npc-toggle").textContent = showRoster ? (selected ? "Ocultar" : "Elegir") : "Cambiar";
+    $("#npc-toggle").style.visibility = selected ? "visible" : "hidden";
+    const npcCard = (n, active) => {
+      const info = attrInfo(n.attr);
+      return `
+        <article class="recruit-card ${active ? "active" : ""}" style="--c:${info.color}">
+          <div class="quest-icon" style="color:${info.color}">${n.icon}</div>
+          <div>
+            <strong>${n.name}</strong>
+            <p>${n.effect}</p>
+            <small style="color:${info.color}">Atributo: ${n.attr} · ${n.when}</small>
+          </div>
+          ${active && !showRoster ? `<span class="pill npc-active-pill">Activo ✓</span>` : `<button class="mini-button" data-npc="${n.attr}" type="button">${active ? "Activo ✓" : "Elegir"}</button>`}
+        </article>`;
+    };
+    $("#npc-list").innerHTML = showRoster
+      ? BASIC_NPCS.map((n) => npcCard(n, state.selectedNpc === n.attr)).join("")
+      : npcCard(selected, true);
+    $$("[data-npc]").forEach((b) =>
+      b.addEventListener("click", () => {
+        npcRosterOpen = false;
+        selectNpc(b.dataset.npc);
+      }),
+    );
+  }
 
   // consumibles de combate (solo buffs equipables; heal se aplica al instante)
   const buffs = Object.entries(CONSUMABLES).filter(([id, c]) => (state.inventory[id] || 0) > 0);
@@ -1419,7 +1638,8 @@ function renderBoss() {
   $("#hero-hp-label").textContent = `${fmt(state.heroHp)} / ${fmt(maxHeroHp())}`;
   $("#dmg-estimate").textContent = sample ? `+${fmt(questBattleDamage(sample))}` : "+0";
   const bonuses = [];
-  if (state.selectedNpc) bonuses.push(npcByAttr(state.selectedNpc).name);
+  const selNpc = npcByAttr(state.selectedNpc);
+  if (selNpc) bonuses.push(selNpc.name);
   state.equippedConsumables.forEach((id) => bonuses.push(CONSUMABLES[id].name));
   $("#active-bonus").textContent = bonuses.length ? bonuses.join(", ") : "—";
   $("#prep-summary-pill").textContent = `PV ${fmt(state.heroHp)}/${fmt(maxHeroHp())}`;
@@ -1443,9 +1663,11 @@ function renderBoss() {
     .join("");
   $$("[data-battle]").forEach((b) => b.addEventListener("click", () => markBattleMission(b.dataset.battle)));
 
-  const canAttack = pendingBattleDamage() > 0 && hp > 0 && !state.resting;
+  // "vivo/muerto" según el daño YA aplicado (no el encolado), para poder dar el golpe final.
+  const aliveHp = boss.maxHp - bossDamageDone();
+  const canAttack = pendingBattleDamage() > 0 && aliveHp > 0 && !state.resting;
   $("#attack-button").disabled = !canAttack;
-  $("#attack-button").textContent = state.resting ? "Héroe en descanso 💤" : hp <= 0 ? "Boss derrotado 🏆" : "⚔ Desatar ataque";
+  $("#attack-button").textContent = state.resting ? "Héroe en descanso 💤" : aliveHp <= 0 ? "Boss derrotado 🏆" : "⚔ Desatar ataque";
 
   $("#rest-note").classList.toggle("hidden", !state.resting);
   if (state.resting) {
@@ -1620,13 +1842,20 @@ function renderArchive() {
   }).join("");
 
   // reliquias (galería con siluetas para arcos no completados)
-  $("#relic-gallery").innerHTML = ARCS.map((a) => {
-    const r = state.relics.find((x) => x.arc === a.id);
-    if (r) {
-      return `<article class="relic-card"><span>👑</span><div><strong>${r.name}</strong><p>${r.lore}</p><small>${a.title} · ${r.date}</small></div></article>`;
-    }
-    return `<article class="relic-card silhouette"><span>❔</span><div><strong>Reliquia desconocida</strong><p>Completa "${a.title}" para revelarla.</p></div></article>`;
-  }).join("");
+  // reliquias especiales (no atadas a un arco), p. ej. el emblema del tutorial
+  const specialRelics = state.relics
+    .filter((r) => !ARCS.some((a) => a.id === r.arc))
+    .map((r) => `<article class="relic-card"><span>🛡</span><div><strong>${r.name}</strong><p>${r.lore}</p><small>Recuerdo · ${r.date}</small></div></article>`)
+    .join("");
+  $("#relic-gallery").innerHTML =
+    specialRelics +
+    ARCS.map((a) => {
+      const r = state.relics.find((x) => x.arc === a.id);
+      if (r) {
+        return `<article class="relic-card"><span>👑</span><div><strong>${r.name}</strong><p>${r.lore}</p><small>${a.title} · ${r.date}</small></div></article>`;
+      }
+      return `<article class="relic-card silhouette"><span>❔</span><div><strong>Reliquia desconocida</strong><p>Completa "${a.title}" para revelarla.</p></div></article>`;
+    }).join("");
 
   // estadísticas históricas
   const topAttr = ATTR_IDS.reduce((b, id) => ((state.attributes[id] ?? 0) > (state.attributes[b] ?? 0) ? id : b), "STR");
@@ -1661,11 +1890,18 @@ $("#login-form").addEventListener("submit", (e) => {
   save();
   $("#login-screen").classList.remove("active");
   $("#app-screen").classList.add("active");
-  render();
+  // Héroe nuevo → registro en el gremio (tutorial). Si no, juego normal.
+  if (isTutorial() && !state.tutorial.seenIntro) {
+    startTutorial();
+  } else {
+    render();
+  }
 });
 
 $("#attack-button").addEventListener("click", attackBoss);
 $("#end-day-button").addEventListener("click", endOfDayAttack);
+$("#gd-next").addEventListener("click", advanceDialogue);
+$("#gd-skip").addEventListener("click", skipTutorial);
 
 $("#npc-toggle").addEventListener("click", () => {
   npcRosterOpen = !npcRosterOpen;
@@ -1699,7 +1935,8 @@ $$(".char-tab").forEach((tab) => {
 });
 
 // si ya hay partida, saltar login
-if (localStorage.getItem(STORAGE_KEY)) {
+const hasSave = Boolean(localStorage.getItem(STORAGE_KEY));
+if (hasSave) {
   $("#login-screen").classList.remove("active");
   $("#app-screen").classList.add("active");
 }
@@ -1711,3 +1948,8 @@ window.addEventListener("pointerdown", unlockAudio, { once: true });
 setInterval(tickTimers, 1000);
 
 render();
+
+// reanudar el tutorial si se recargó durante la intro
+if (hasSave && isTutorial() && !state.tutorial.seenIntro) {
+  startTutorial();
+}

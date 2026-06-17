@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>Hero's Ledger</title>
-    <link rel="stylesheet" href="./styles.css?v=7" />
+    <link rel="stylesheet" href="./styles.css?v=13" />
   </head>
   <body>
     <main class="phone-shell" aria-live="polite">
@@ -262,10 +262,29 @@
         </div>
       </div>
 
+      <!-- diálogo del maestro del gremio (tutorial) -->
+      <div id="guild-dialogue" class="gd-backdrop hidden">
+        <div class="gd-card">
+          <div class="gd-head">
+            <div class="gd-portrait" id="gd-portrait">🧙</div>
+            <div>
+              <span class="gd-who" id="gd-who">Maestro del Gremio</span>
+              <span class="gd-place">Gremio de Aventureros · Bremont</span>
+            </div>
+            <span class="gd-progress" id="gd-progress"></span>
+          </div>
+          <p class="gd-text" id="gd-text"></p>
+          <div class="gd-actions">
+            <button id="gd-skip" class="link-button" type="button">Saltar tutorial</button>
+            <button id="gd-next" class="primary-button" type="button">Continuar</button>
+          </div>
+        </div>
+      </div>
+
       <!-- pop notifications -->
       <div id="toast-stack" class="toast-stack" aria-live="assertive"></div>
     </main>
 
-    <script src="./app.js?v=7"></script>
+    <script src="./app.js?v=13"></script>
   </body>
 </html>
