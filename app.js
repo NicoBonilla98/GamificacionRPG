@@ -87,13 +87,44 @@ const ARCS = [
     id: "animales",
     title: "El Misterio de los Animales Armados",
     summary: "Mercaderes atacados en la ruta y animales que visten armadura. ¿Quién los arma y para qué?",
-    npc: { name: "Maestro del Gremio", role: "Gremio de Bremont", attr: "INT" },
-    relic: { name: "Emblema Desconocido", lore: "La marca hallada en la armadura del lobo. El origen de todo el misterio." },
+    npc: { name: "Jim", role: "Druida nómada", attr: "INT" },
+    relic: { name: "Libro de la Magia de Control", lore: "Detalla cómo transferir un alma a una pieza de equipo. Magia prohibida hallada en el laboratorio de la mina." },
     chapters: [
-      { id: "a1", title: "Capítulo 1 — Fácil", level: "Lv. 1-5", tone: "green", boss: "3 Lobos con Armadura", key: "Llave del Camino", beat: "Los carruajes fueron atacados, pero nada robado — solo faltan las personas.", missions: ["Investigar la ruta atacada", "Examinar los carruajes vacíos", "Seguir el grito hasta los lobos"] },
-      { id: "a2", title: "Capítulo 2 — Media", level: "Lv. 6-12", tone: "amber", boss: "El Oso Guardián", key: "Llave de la Mina", beat: "Una mina abandonada, armaduras de mercaderes en el piso... y un oso que las viste.", missions: ["Adentrarse en el bosque", "Sentir que algo te observa", "Llegar a la mina abandonada"] },
-      { id: "a3", title: "Capítulo 3 — Difícil", level: "Lv. 13-20", tone: "red", boss: "Pendiente de definir", key: "Sello del Misterio", beat: "¿Quién arma a los animales? El rastro se vuelve más oscuro.", missions: ["Pendiente de definir", "Pendiente de definir", "Pendiente de definir"] },
-      { id: "a4", title: "Capítulo 4 — Final", level: "Lv. 21+", tone: "violet", boss: "Pendiente de definir", key: "Reliquia del Arco 1", beat: "El misterio de los animales armados debe resolverse aquí.", missions: ["Pendiente de definir", "Pendiente de definir", "Pendiente de definir", "La batalla final"], requiresKeys: 3 },
+      {
+        id: "a1", title: "Capítulo 1 — La Manada en el Camino", level: "Lv. 1-5", tone: "green",
+        boss: "3 Lobos con Armadura", key: "Llave del Camino",
+        beat: "Los carruajes fueron atacados, pero nada robado — solo faltan las personas.",
+        missions: ["Investigar la ruta atacada", "Examinar los carruajes vacíos", "Seguir el grito hasta la manada"],
+        lines: [
+          "Reportes de mercaderes atacados en la ruta. El gremio me envía a investigar.",
+          "Objetos de valor intactos… pero ninguna persona. ¿Qué clase de bestia roba gente y deja el oro?",
+          "Un grito entre los árboles. Sigo el sonido y encuentro lobos esperando junto a un carruaje.",
+        ],
+      },
+      {
+        id: "a2", title: "Capítulo 2 — La Mina Abandonada", level: "Lv. 6-12", tone: "amber",
+        boss: "El Oso Acorazado", key: "Llave de la Mina",
+        beat: "Un libro de magia de control, un laboratorio abandonado… y un oso que cierra la escalada.",
+        missions: ["El Jabalí de la Entrada", "Punto de decisión", "El Murciélago Despierto", "El Laboratorio y la Revelación", "El Oso y la Huida de la Rata"],
+        lines: [
+          "Un jabalí con armadura de mercader bloquea la entrada. Un druida llamado Jim aparece y me ayuda a derribarlo: seguía los mismos rumores.",
+          "Jim quiere seguir juntos, pero podría cubrir más terreno por separado…",
+          "Un murciélago de metro y medio, despertado por el ruido. Jim nota un pendiente colgado a su cuello: magia de control imbuida en metal.",
+          "Un laboratorio con armaduras regadas. Sobre la mesa, un libro: transferir un alma a una pieza de equipo. A la salida, una invitación a la Proclamación de los Caballeros del Reino.",
+          "Una rata escapa con un pendiente. Tras ella, un oso acorazado sin arma — el guardián final. Lo vencemos y tomamos el libro.",
+        ],
+        // Escena 2 — Punto de decisión (mecánica reutilizable)
+        decision: {
+          atMission: 1,
+          prompt: "Jim cuenta que los objetos de valor quedaban intactos mientras las personas desaparecían. ¿Cómo avanzas?",
+          options: [
+            { id: "fuerza", label: "Separarse (Camino de Fuerza)", text: "Exploras solo y hallas el equipo de un soldado atacado. Te llevas unas botas.", reward: { slot: "boots" } },
+            { id: "social", label: "Seguir con Jim (Camino Social)", text: "Te quedas con Jim, que comparte su teoría. Entre las piezas de armadura tomas unos guantes (accesorio).", reward: { slot: "accessory" } },
+          ],
+        },
+      },
+      { id: "a3", title: "Capítulo 3 — Difícil", level: "Lv. 13-20", tone: "red", boss: "Pendiente de definir", key: "Sello del Misterio", beat: "¿Quién está detrás de la magia de control y para qué? El rastro se vuelve más oscuro.", missions: ["Pendiente de definir", "Pendiente de definir", "Pendiente de definir"], lines: ["Pendiente de definir.", "Pendiente de definir.", "Pendiente de definir."] },
+      { id: "a4", title: "Capítulo 4 — Final", level: "Lv. 21+", tone: "violet", boss: "Pendiente de definir", key: "Reliquia del Arco 1", beat: "El misterio de los animales armados debe resolverse aquí.", missions: ["Pendiente de definir", "Pendiente de definir", "Pendiente de definir", "La batalla final"], lines: ["Pendiente.", "Pendiente.", "Pendiente.", "La batalla final."], requiresKeys: 3 },
     ],
   },
   {
@@ -194,7 +225,16 @@ const GUILD_DIALOGUES = {
     { who: "Maestro del Gremio", text: "Déjame ver… No pertenece a ninguna casa conocida. Alguien armó a esa bestia a propósito, y quiero saber quién." },
     { who: "Maestro del Gremio", text: "Tu siguiente encargo será una escolta a la capital — pero guarda ese emblema. Acabas de abrir un misterio mayor. El gremio cuenta contigo, aventurero." },
   ],
+  // 9.5 Escena 5 — Cierre en el Gremio (otorga el Rango E)
+  rankE: [
+    { who: "Maestro del Gremio", text: "Con que magia de control… es una magia prohibida: ocasiona graves daños a sus víctimas. Quien la usa debe ser un brujo peligroso." },
+    { who: "Maestro del Gremio", text: "Debo notificar esto al resto del gremio. Tienes suerte de haber salido ileso." },
+    { who: "Maestro del Gremio", text: "Por tan peligrosa misión, el gremio te otorga el Rango E como prueba de tu valor. Y con ello, se abren las expediciones del mundo entero." },
+  ],
 };
+
+// 8. Sistema de Rango de Gremio (identidad narrativa; sube solo con expediciones).
+const GUILD_RANKS = ["E", "D", "C", "B", "A", "S"];
 
 /* ---------------------------------------------------------------------------
    6. SETS DE EQUIPO — 4 sets temáticos, 5 piezas cada uno (tablas 19-22).
@@ -349,6 +389,10 @@ function freshState() {
     completedArcs: [],
     titles: [],
     relics: [],
+    chapterChoices: {}, // chapterId -> id de la opción elegida (puntos de decisión)
+    narrativeItems: [], // objetos de historia (libro, invitación…) para el Archivo
+    // 8. Rango de Gremio (identidad narrativa, sin efecto en stats)
+    guildRank: null, // null | "E" | "D" | "C" | "B" | "A" | "S"
     // equipo e inventario
     equipment: {}, // slotId -> {name, rarity, attr, threshold, awakened}
     inventory: {}, // consumableId -> cantidad
@@ -1124,21 +1168,90 @@ function advanceChapter(arc, ch) {
     toast(`Necesitas ${ch.requiresKeys} llaves para abrir este capítulo.`, "#d43b4a", "🔒");
     return;
   }
-  const prog = (state.chapterProgress[ch.id] || 0) + 1;
+  const cur = state.chapterProgress[ch.id] || 0;
+  // 9.5 Escena 2 — Punto de decisión (mecánica reutilizable)
+  if (ch.decision && cur === ch.decision.atMission && !state.chapterChoices[ch.id]) {
+    presentDecision(arc, ch);
+    return;
+  }
+  doAdvanceChapter(arc, ch);
+}
+
+function doAdvanceChapter(arc, ch) {
+  const justDid = state.chapterProgress[ch.id] || 0; // índice de la misión que se completa
+  const prog = justDid + 1;
   state.chapterProgress[ch.id] = prog;
+  const line = (ch.lines && ch.lines[justDid]) || ch.beat;
+  const wasDecision = ch.decision && justDid === ch.decision.atMission;
+
   if (prog >= ch.missions.length) {
     // capítulo completado → otorga llave (micro-ritual)
     state.keys[arc.id] = arcKeys(arc.id) + 1;
     toast(`Capítulo completado · ${ch.key} obtenida`, "#b18bff", "🗝");
     gainXp(300);
-    // ¿arco completo?
+    handleChapterComplete(arc, ch);
     if (arc.chapters.every((c) => chapterDone(c.id))) completeArc(arc);
   } else {
-    toast(ch.beat, "#7ecb8e", "📜");
     gainXp(80);
+    // 10. Diálogo por quest (granular): una línea por misión completada
+    if (!wasDecision) questDialogue(arc, line);
   }
   save();
   render();
+}
+
+// 10. Mecánica de diálogos por quest — una línea corta tras cada misión.
+function questDialogue(arc, line) {
+  showDialogue([{ who: arc.npc?.name && arc.npc.name !== "—" ? arc.npc.name : "Bitácora", text: line, portrait: "📜", place: arc.title }]);
+}
+
+// 9.5 Punto de decisión: bifurcación con recompensa de equipo distinta.
+function presentDecision(arc, ch) {
+  const d = ch.decision;
+  showChoice({
+    who: "Punto de decisión",
+    place: arc.title,
+    portrait: "🌿",
+    prompt: d.prompt,
+    options: d.options.map((o) => ({
+      label: o.label,
+      onPick: () => {
+        state.chapterChoices[ch.id] = o.id;
+        grantSlotEquipment(o.reward.slot);
+        save();
+        showDialogue([{ who: o.id === "fuerza" ? "Héroe" : "Jim", text: o.text, portrait: "📜", place: arc.title }], () => doAdvanceChapter(arc, ch));
+      },
+    })),
+  });
+}
+
+function grantSlotEquipment(slotId) {
+  const setId = setForLevel();
+  const piece = setById(setId).pieces[slotId];
+  state.equipment[slotId] = { slot: slotId, set: setId, name: piece.name };
+  toast(`Obtienes ${piece.name} · ${setById(setId).name}`, "#f2cc45", "🎁");
+}
+
+function addNarrativeItem(name, lore, icon) {
+  if (state.narrativeItems.find((n) => n.name === name)) return;
+  state.narrativeItems.push({ name, lore, icon, date: today() });
+}
+
+// Eventos al completar un capítulo concreto (objetos narrativos, Rango de Gremio).
+function handleChapterComplete(arc, ch) {
+  if (arc.id === "animales" && ch.id === "a2") {
+    addNarrativeItem("Libro de la Magia de Control", "Detalla cómo transferir un alma a una pieza de equipo. Magia prohibida hallada en el laboratorio.", "📕");
+    addNarrativeItem("Invitación a la Proclamación", "Invitación a la Proclamación de los Caballeros del Reino, hallada en la mina. ¿De quién era? Gancho abierto.", "✉");
+    // 8.1 El Rango E se otorga al completar la introducción (Cap. 2).
+    if (!state.guildRank) {
+      showDialogue(GUILD_DIALOGUES.rankE, () => {
+        state.guildRank = "E";
+        toast("¡Rango de Gremio E obtenido!", "#f2cc45", "🎖");
+        save();
+        render();
+      });
+    }
+  }
 }
 
 function completeArc(arc) {
@@ -1217,6 +1330,8 @@ function showDialogue(beats, onDone) {
   dialogueBeats = beats;
   dialogueIndex = 0;
   dialogueOnDone = onDone || null;
+  $("#gd-choices").style.display = "none";
+  $("#gd-actions").style.display = "";
   $("#gd-skip").style.display = isTutorial() ? "" : "none";
   $("#guild-dialogue").classList.remove("hidden");
   renderDialogueBeat();
@@ -1224,11 +1339,11 @@ function showDialogue(beats, onDone) {
 function renderDialogueBeat() {
   const beat = dialogueBeats[dialogueIndex];
   if (!beat) return;
-  const reno = /reno/i.test(beat.who);
-  $("#gd-portrait").textContent = reno ? "🏹" : "🧙";
+  $("#gd-portrait").textContent = beat.portrait || (/reno/i.test(beat.who) ? "🏹" : /jim/i.test(beat.who) ? "🌿" : "🧙");
   $("#gd-who").textContent = beat.who;
+  $("#gd-place").textContent = beat.place || "Gremio de Aventureros · Bremont";
   $("#gd-text").textContent = beat.text;
-  $("#gd-progress").textContent = `${dialogueIndex + 1}/${dialogueBeats.length}`;
+  $("#gd-progress").textContent = dialogueBeats.length > 1 ? `${dialogueIndex + 1}/${dialogueBeats.length}` : "";
   $("#gd-next").textContent = dialogueIndex === dialogueBeats.length - 1 ? "Entendido" : "Continuar";
 }
 function advanceDialogue() {
@@ -1241,6 +1356,33 @@ function advanceDialogue() {
   const cb = dialogueOnDone;
   dialogueOnDone = null;
   if (cb) cb();
+}
+
+// Modal de decisión (reusa el modal de diálogo con botones de opción).
+function showChoice(cfg) {
+  $("#gd-portrait").textContent = cfg.portrait || "🌿";
+  $("#gd-who").textContent = cfg.who || "Decisión";
+  $("#gd-place").textContent = cfg.place || "";
+  $("#gd-text").textContent = cfg.prompt;
+  $("#gd-progress").textContent = "";
+  $("#gd-actions").style.display = "none";
+  const box = $("#gd-choices");
+  box.style.display = "grid";
+  box.innerHTML = "";
+  cfg.options.forEach((o) => {
+    const b = document.createElement("button");
+    b.className = "primary-button gd-choice-btn";
+    b.type = "button";
+    b.textContent = o.label;
+    b.addEventListener("click", () => {
+      box.style.display = "none";
+      $("#gd-actions").style.display = "";
+      $("#guild-dialogue").classList.add("hidden");
+      o.onPick();
+    });
+    box.appendChild(b);
+  });
+  $("#guild-dialogue").classList.remove("hidden");
 }
 
 // Inicia el tutorial al crear un héroe nuevo.
@@ -1316,6 +1458,12 @@ function goToView(viewId) {
    RENDER
    ========================================================================= */
 const fmt = (n) => new Intl.NumberFormat("es-ES").format(Math.round(n));
+
+// Insignia del Rango de Gremio (identidad narrativa, sin efecto en stats).
+function guildRankBadge() {
+  if (!state.guildRank) return "";
+  return ` <span class="guild-rank" title="Rango de Gremio">${state.guildRank}</span>`;
+}
 
 function rankForLevel(lvl) {
   if (lvl >= 21) return "Leyenda";
@@ -1740,7 +1888,7 @@ function renderExpedition() {
 
 function renderCharacter() {
   const totals = totalAttributes();
-  $("#character-name").textContent = state.name;
+  $("#character-name").innerHTML = `${state.name}${guildRankBadge()}`;
   $("#topbar-name").textContent = state.name;
   $("#character-summary").textContent = `Nivel ${state.level} · ${rankForLevel(state.level)}`;
   $("#total-xp").textContent = fmt(state.totalXp);
@@ -1823,7 +1971,7 @@ function topAttrLabel(totals) {
 }
 
 function renderArchive() {
-  $("#archive-name").textContent = state.name;
+  $("#archive-name").innerHTML = `${state.name}${guildRankBadge()}`;
   $("#archive-title").textContent = state.titles.length ? state.titles[state.titles.length - 1] : "Sin título aún";
   $("#archive-level").textContent = state.level;
   $("#archive-start").textContent = state.startDate;
@@ -1841,13 +1989,16 @@ function renderArchive() {
       </article>`;
   }).join("");
 
-  // reliquias (galería con siluetas para arcos no completados)
-  // reliquias especiales (no atadas a un arco), p. ej. el emblema del tutorial
+  // reliquias especiales (no atadas a un arco) + objetos narrativos (libro, invitación…)
   const specialRelics = state.relics
     .filter((r) => !ARCS.some((a) => a.id === r.arc))
     .map((r) => `<article class="relic-card"><span>🛡</span><div><strong>${r.name}</strong><p>${r.lore}</p><small>Recuerdo · ${r.date}</small></div></article>`)
     .join("");
+  const storyItems = (state.narrativeItems || [])
+    .map((n) => `<article class="relic-card story"><span>${n.icon}</span><div><strong>${n.name}</strong><p>${n.lore}</p><small>Objeto narrativo · ${n.date}</small></div></article>`)
+    .join("");
   $("#relic-gallery").innerHTML =
+    storyItems +
     specialRelics +
     ARCS.map((a) => {
       const r = state.relics.find((x) => x.arc === a.id);
