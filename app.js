@@ -89,6 +89,12 @@ const ARCS = [
     summary: "Mercaderes atacados en la ruta y animales que visten armadura. ¿Quién los arma y para qué?",
     npc: { name: "Jim", role: "Druida nómada", attr: "INT" },
     relic: { name: "Libro de la Magia de Control", lore: "Detalla cómo transferir un alma a una pieza de equipo. Magia prohibida hallada en el laboratorio de la mina." },
+    // La introducción concluye en el Cap. 2 (Oso + reporte al gremio). Caps 3-4 pendientes.
+    toBeContinued: true,
+    continuation: {
+      title: "Capítulos 3 y 4 — Próximamente",
+      text: "¿Quién está detrás de la magia de control y para qué? El rastro del brujo, la rata con el pendiente y la invitación a la Proclamación continuarán en una próxima actualización.",
+    },
     chapters: [
       {
         id: "a1", title: "Capítulo 1 — La Manada en el Camino", level: "Lv. 1-5", tone: "green",
@@ -123,8 +129,6 @@ const ARCS = [
           ],
         },
       },
-      { id: "a3", title: "Capítulo 3 — Difícil", level: "Lv. 13-20", tone: "red", boss: "Pendiente de definir", key: "Sello del Misterio", beat: "¿Quién está detrás de la magia de control y para qué? El rastro se vuelve más oscuro.", missions: ["Pendiente de definir", "Pendiente de definir", "Pendiente de definir"], lines: ["Pendiente de definir.", "Pendiente de definir.", "Pendiente de definir."] },
-      { id: "a4", title: "Capítulo 4 — Final", level: "Lv. 21+", tone: "violet", boss: "Pendiente de definir", key: "Reliquia del Arco 1", beat: "El misterio de los animales armados debe resolverse aquí.", missions: ["Pendiente de definir", "Pendiente de definir", "Pendiente de definir", "La batalla final"], lines: ["Pendiente.", "Pendiente.", "Pendiente.", "La batalla final."], requiresKeys: 3 },
     ],
   },
   {
@@ -154,7 +158,39 @@ const ARCS = [
     ],
   },
 ];
-const arcById = (id) => ARCS.find((a) => a.id === id);
+// 9.3 Expedición 1 — Escolta a la Capital (introductoria, fuera de la rotación).
+// Se juega tras el tutorial; al completarla se abre el misterio de los animales.
+const ESCOLTA = {
+  id: "escolta",
+  title: "Expedición 1 — Escolta a la Capital",
+  summary: "Acompaña a un mercader de Bremont con su mercancía hasta la ciudad capital.",
+  intro: true,
+  npc: { name: "Mercader", role: "Caravana de Bremont", attr: "SOC" },
+  relic: { name: "Sello de la Caravana", lore: "Prueba de tu primera escolta exitosa para el gremio." },
+  chapters: [
+    {
+      id: "esc1", title: "La Ruta a la Capital", level: "Lv. 1-5", tone: "green",
+      boss: "Pandilla de Goblins", key: "Llave de la Caravana",
+      beat: "Una pandilla de goblins embosca el convoy en mitad del camino.",
+      missions: ["Preparar la carga del mercader", "Presentarte con la caravana", "El trayecto por el camino real", "Primeras señales de peligro"],
+      lines: [
+        "El mercader confía su mercancía al gremio. Reviso y aseguro cada bulto antes de partir.",
+        "Me presento con la caravana. El mercader agradece la compañía: el camino ya no es seguro.",
+        "Avanzamos por el camino real. El mercader habla de rumores: animales con armadura atacando convoyes.",
+        "Ruidos entre los matorrales… algo nos observa. La emboscada es inminente.",
+      ],
+    },
+  ],
+};
+
+const arcById = (id) => (id === "escolta" ? ESCOLTA : ARCS.find((a) => a.id === id));
+
+// Metadata del boss de cada capítulo (sprite + debilidad). Default: heraldo / sin debilidad.
+const CHAPTER_BOSS_META = {
+  esc1: { sprite: "goblin", weak: "DIS" },
+  a1: { sprite: "lobo", weak: "STR" },
+  a2: { sprite: "oso", weak: "STR" },
+};
 
 /* ---------------------------------------------------------------------------
    4-5. BOSSES y NPCs
@@ -203,7 +239,7 @@ const TUTORIAL_QUESTS = ["str_f1", "int_f1", "vit_f1", "dis_f1", "soc_f1"];
 
 // Boss del tutorial: Lobo Armado. 40 HP; el NPC tutorial amplifica a 8 dmg/misión.
 const TUTORIAL_BOSS = {
-  id: "lobo_armado", name: "Lobo Armado", epithet: "La bestia que no debería llevar armadura", type: "Bestia",
+  id: "lobo_armado", spriteId: "lobo", name: "Lobo Armado", epithet: "La bestia que no debería llevar armadura", type: "Bestia",
   badge: "Bestia", weakness: null, npc: "tutorial", level: 1, maxHp: 40, healPct: 0, hue: 35,
   desc: "Un lobo del bosque cercano que, inexplicablemente, viste piezas de armadura. ¿Quién lo armó?",
 };
@@ -381,10 +417,15 @@ function freshState() {
     equippedConsumables: [], // ids hoy
     heroHp: null,
     resting: false,
+    retriesUsed: 0, // reintentos de VIT gastados este día de combate
     battleDone: [], // misiones de combate completadas hoy
     // expediciones
     keys: {}, // arcId -> nº de llaves
-    chapterProgress: {}, // chapterId -> nº misiones completadas
+    chapterProgress: {}, // chapterId -> nº misiones narrativas completadas
+    chaptersCleared: {}, // chapterId -> true (boss del capítulo derrotado)
+    expeditionBattle: null, // { arcId, chId } cuando se pelea al boss de un capítulo
+    escortaDone: false, // Expedición 1 (Escolta a la Capital) completada
+    rotationUnlocked: false, // rotación semanal de arcos (se abre al cerrar el Cap. 2)
     arcWeek: 0,
     completedArcs: [],
     titles: [],
@@ -503,6 +544,17 @@ function ensureDailyReset() {
 
   // Evaluar racha si cambió el día
   if (state.lastReset && state.lastReset !== t) evaluateStreak();
+
+  // 4.5 Recuperación natural de PV por día según VIT (más VIT = recupera más).
+  if (state.heroHp != null) {
+    const max = maxHeroHp();
+    if (state.heroHp < max) {
+      const vit = totalAttributes().VIT ?? 0;
+      const recover = Math.max(1, Math.round(max * (0.25 + Math.min(vit, 50) * 0.01)));
+      state.heroHp = Math.min(max, state.heroHp + recover);
+    }
+  }
+  state.retriesUsed = 0; // los reintentos de VIT se renuevan cada día
 
   state.completedToday = [];
   state.battleDone = [];
@@ -895,8 +947,16 @@ function completeQuest(id) {
 function isTutorial() {
   return Boolean(state.tutorial?.active);
 }
+function isExpeditionBattle() {
+  return Boolean(state.expeditionBattle);
+}
 function activeBoss() {
   if (isTutorial()) return TUTORIAL_BOSS;
+  if (state.expeditionBattle) {
+    const arc = arcById(state.expeditionBattle.arcId);
+    const ch = arc?.chapters.find((c) => c.id === state.expeditionBattle.chId);
+    if (arc && ch) return expeditionBoss(arc, ch);
+  }
   return bossById(state.selectedBoss) || BOSSES[0];
 }
 function bossDamageDone() {
@@ -932,15 +992,20 @@ function questBattleDamage(q) {
   dmg *= 1 + passiveDamageBonus();
   // bonus del NPC, amplificado por SOC (Carisma +10%, Vínculos ×2)
   let npcBonus = 0;
-  if (state.selectedNpc === "STR") npcBonus = 0.2; // Guerrero
-  else if (state.selectedNpc === "SOC") npcBonus = 0.15; // Bardo
+  if (isExpeditionBattle()) {
+    npcBonus = 0.2; // NPC narrativo del arco acompaña en la expedición
+  } else if (state.selectedNpc === "STR") {
+    npcBonus = 0.2; // Guerrero
+  } else if (state.selectedNpc === "SOC") {
+    npcBonus = 0.15; // Bardo
+  }
   if (npcBonus > 0) {
     if (hasPassive("SOC", 10)) npcBonus *= 1.1; // Carisma
     if (hasPassive("SOC", 25)) npcBonus *= 2; // Vínculos (ataca dos veces)
   }
   dmg *= 1 + npcBonus;
-  // bonus por golpear la debilidad del boss con el NPC adecuado
-  if (state.selectedNpc === activeBoss().weakness) dmg *= 1.25;
+  // bonus por golpear la debilidad del boss con el NPC adecuado (solo bosses genéricos)
+  if (!isExpeditionBattle() && state.selectedNpc === activeBoss().weakness) dmg *= 1.25;
   // tónico de batalla equipado
   if (state.equippedConsumables.includes("tonic")) dmg *= 1.2;
   return Math.round(dmg);
@@ -993,8 +1058,8 @@ function attackBoss() {
   state.battleDone = [];
 
   const killed = state.bossDamage[boss.id] >= boss.maxHp;
-  // si es la victoria del tutorial, el diálogo de Reno reemplaza al pop de combate
-  const tutorialVictory = killed && isTutorial();
+  // en victorias del tutorial o de expedición, el diálogo/retorno reemplaza al pop
+  const suppressPop = killed && (isTutorial() || isExpeditionBattle());
   if (killed) {
     defeatBoss();
   } else {
@@ -1002,7 +1067,7 @@ function attackBoss() {
   }
   save();
   render();
-  if (!tutorialVictory) openCombatPop(dmg);
+  if (!suppressPop) openCombatPop(dmg);
 }
 
 function bossCounterAttack() {
@@ -1025,6 +1090,11 @@ function defeatBoss() {
     finishTutorialCombat();
     return;
   }
+  // Boss de expedición: completa el capítulo y otorga la llave.
+  if (state.expeditionBattle) {
+    defeatExpeditionBoss();
+    return;
+  }
   state.bossesDefeated += 1;
   state.bossesByType.generic += 1;
   toast(`¡${boss.name} derrotado!`, "#d43b4a", "🏆");
@@ -1035,6 +1105,50 @@ function defeatBoss() {
   if (hasPassive("SOC", 50) && Math.random() < 0.5) addConsumable("herb", 1, true);
   // resetear daño para que pueda reaparecer otro día
   state.bossDamage[boss.id] = 0;
+}
+
+// 4. Derrota del boss de un capítulo de expedición.
+function defeatExpeditionBoss() {
+  const { arcId, chId } = state.expeditionBattle;
+  const arc = arcById(arcId);
+  const ch = arc.chapters.find((c) => c.id === chId);
+  state.chaptersCleared[chId] = true;
+  state.chapterProgress[chId] = ch.missions.length;
+  state.keys[arcId] = arcKeys(arcId) + 1;
+  state.bossesDefeated += 1;
+  state.bossesByType.expedition += 1;
+  state.bossDamage["exp_" + chId] = 0;
+  state.expeditionBattle = null;
+  state.bossMode = "select";
+  // drop: pieza de set (las expediciones dan mejor equipo)
+  dropEquipment({ dropSlots: ["weapon", "armor", "accessory", "helmet", "boots"] });
+  addConsumable("essence", 1, true);
+  goToView("expedition-view");
+
+  // Cierre de la Escolta: el mercader conecta con el misterio.
+  if (arc.id === "escolta") {
+    state.escortaDone = true;
+    save();
+    showDialogue(
+      [
+        { who: "Mercader", text: "¡Lo logramos! Gracias a ti la mercancía llegó completa.", portrait: "🧺", place: arc.title },
+        { who: "Mercader", text: "Por cierto… últimamente corren rumores de animales con armadura atacando los caminos comerciales. Suena a locura, pero ten cuidado.", portrait: "🧺", place: arc.title },
+      ],
+      () => {
+        toast("Expedición 1 completada · misterio desbloqueado", "#f2cc45", "🗺");
+        render();
+      },
+    );
+    return;
+  }
+
+  // Capítulos del misterio: eventos de capítulo (Rango E en Cap. 2) + cierre de arco.
+  handleChapterComplete(arc, ch);
+  toast(`¡${ch.boss} derrotado! ${ch.key} obtenida`, "#b18bff", "🗝");
+  // El arco "a continuar" no se marca como completado (caps 3-4 pendientes).
+  if (!arc.toBeContinued && arc.chapters.every((c) => chapterDone(c.id))) completeArc(arc);
+  save();
+  render();
 }
 
 // Ataque devastador nocturno (4.4) — botón "simular cierre de día"
@@ -1067,8 +1181,27 @@ function endOfDayAttack() {
   render();
 }
 
-// 4.5 Estado de descanso
+// Pasivas de VIT — reintentos al caer (Resistencia/Temple/Fortaleza/Inmortal).
+function vitRetries() {
+  const v = state.attributes.VIT ?? 0; // umbral por valor real ganado
+  if (v >= 100) return Infinity;
+  if (v >= 50) return 3;
+  if (v >= 25) return 2;
+  if (v >= 10) return 1;
+  return 0;
+}
+
+// 4.5 Estado de descanso — con reintentos de VIT antes de caer.
 function enterRest() {
+  const retries = vitRetries();
+  if ((state.retriesUsed || 0) < retries) {
+    state.retriesUsed = (state.retriesUsed || 0) + 1;
+    state.heroHp = maxHeroHp();
+    state.resting = false;
+    const label = retries === Infinity ? "∞" : retries;
+    toast(`¡Reintento de VIT! (${state.retriesUsed}/${label}) — PV restaurados`, "#7ecb8e", "❤");
+    return;
+  }
   state.resting = true;
   toast("El héroe cayó. Estado de descanso activado.", "#d43b4a", "💤");
 }
@@ -1152,14 +1285,50 @@ function addRelic(arc) {
    3. EXPEDICIONES — avanzar capítulos
    ========================================================================= */
 function activeArc() {
+  // Tras el tutorial se juega la Escolta; luego el misterio (Caps 1-2).
+  // La rotación semanal de arcos se abre al cerrar el Cap. 2.
+  if (!state.escortaDone) return ESCOLTA;
+  if (!state.rotationUnlocked) return arcById("animales");
   return ARCS[state.arcWeek % ARCS.length];
 }
+function chapterById(chId) {
+  return [ESCOLTA, ...ARCS].flatMap((a) => a.chapters).find((c) => c.id === chId);
+}
+function arcOfChapter(chId) {
+  return [ESCOLTA, ...ARCS].find((a) => a.chapters.some((c) => c.id === chId));
+}
+// Misiones narrativas del capítulo terminadas (paso previo al boss).
+function missionsDone(ch) {
+  return (state.chapterProgress[ch.id] || 0) >= ch.missions.length;
+}
+// Capítulo completado = boss del capítulo derrotado.
 function chapterDone(chId) {
-  const ch = ARCS.flatMap((a) => a.chapters).find((c) => c.id === chId);
-  return (state.chapterProgress[chId] || 0) >= (ch?.missions.length || 99);
+  return Boolean(state.chaptersCleared?.[chId]);
 }
 function arcKeys(arcId) {
   return state.keys[arcId] || 0;
+}
+
+// Boss de un capítulo de expedición (vida alta, NPC narrativo, cura 10%).
+function expeditionBoss(arc, ch) {
+  const idx = arc.chapters.indexOf(ch);
+  const meta = CHAPTER_BOSS_META[ch.id] || {};
+  return {
+    id: "exp_" + ch.id,
+    name: ch.boss,
+    epithet: arc.title,
+    badge: "Boss de Expedición",
+    type: "Boss de Expedición",
+    spriteId: meta.sprite || "heraldo",
+    weakness: meta.weak || null,
+    maxHp: (idx + 1) * 80,
+    healPct: 0.1,
+    npc: "narrativo",
+    isExpedition: true,
+    arcId: arc.id,
+    chId: ch.id,
+    desc: ch.beat,
+  };
 }
 
 function advanceChapter(arc, ch) {
@@ -1184,19 +1353,25 @@ function doAdvanceChapter(arc, ch) {
   const line = (ch.lines && ch.lines[justDid]) || ch.beat;
   const wasDecision = ch.decision && justDid === ch.decision.atMission;
 
-  if (prog >= ch.missions.length) {
-    // capítulo completado → otorga llave (micro-ritual)
-    state.keys[arc.id] = arcKeys(arc.id) + 1;
-    toast(`Capítulo completado · ${ch.key} obtenida`, "#b18bff", "🗝");
-    gainXp(300);
-    handleChapterComplete(arc, ch);
-    if (arc.chapters.every((c) => chapterDone(c.id))) completeArc(arc);
-  } else {
-    gainXp(80);
-    // 10. Diálogo por quest (granular): una línea por misión completada
-    if (!wasDecision) questDialogue(arc, line);
+  gainXp(80);
+  // 10. Diálogo por quest (granular): una línea por misión completada
+  if (!wasDecision) questDialogue(arc, line);
+  if (missionsDone(ch)) {
+    // Terminadas las misiones narrativas, queda enfrentar al boss del capítulo.
+    toast(`Misiones completas · ¡enfrenta a ${ch.boss}!`, "#f2cc45", "⚔");
   }
   save();
+  render();
+}
+
+// Inicia el combate contra el boss de un capítulo (reusa el motor de combate).
+function startExpeditionBattle(arc, ch) {
+  state.expeditionBattle = { arcId: arc.id, chId: ch.id };
+  state.selectedNpc = null;
+  state.battleDone = [];
+  state.bossMode = "battle";
+  save();
+  goToView("boss-view");
   render();
 }
 
@@ -1242,7 +1417,9 @@ function handleChapterComplete(arc, ch) {
   if (arc.id === "animales" && ch.id === "a2") {
     addNarrativeItem("Libro de la Magia de Control", "Detalla cómo transferir un alma a una pieza de equipo. Magia prohibida hallada en el laboratorio.", "📕");
     addNarrativeItem("Invitación a la Proclamación", "Invitación a la Proclamación de los Caballeros del Reino, hallada en la mina. ¿De quién era? Gancho abierto.", "✉");
-    // 8.1 El Rango E se otorga al completar la introducción (Cap. 2).
+    // 8.1 El Rango E se otorga al completar la introducción (Cap. 2),
+    // y se abre la rotación semanal de los 3 arcos.
+    state.rotationUnlocked = true;
     if (!state.guildRank) {
       showDialogue(GUILD_DIALOGUES.rankE, () => {
         state.guildRank = "E";
@@ -1303,6 +1480,8 @@ function openCombatPop(dmg) {
   $("#cp-boss-hp").textContent = `${fmt(hp)} / ${fmt(boss.maxHp)} PV`;
   $("#cp-hp-bar").style.width = `${(hp / boss.maxHp) * 100}%`;
   $("#cp-close").textContent = hp <= 0 ? "🏆 ¡Victoria!" : "Continuar";
+  const cpMonster = stage.querySelector(".monster-sprite");
+  if (cpMonster) cpMonster.src = bossSpriteSrc(boss);
 
   pop.classList.remove("hidden");
   // reinicia y dispara la animación del duelo
@@ -1584,10 +1763,13 @@ function renderQuests() {
 
 let npcRosterOpen = false;
 
-// Filtro de color del sprite según el jefe (para que se vean distintos sin arte propio)
+// Sprite pixel-art propio de cada jefe (handoff del bestiario).
+function bossSpriteSrc(boss) {
+  return `./assets/bestiary/${boss.spriteId || boss.id}.png`;
+}
+// Filtro del sprite: solo escala de grises al morir (los sprites ya traen su color).
 function bossSpriteFilter(boss, dead) {
-  if (dead) return "grayscale(1) brightness(0.5)";
-  return `hue-rotate(${boss.hue || 0}deg) saturate(1.1)`;
+  return dead ? "grayscale(1) brightness(0.5)" : "";
 }
 
 // ---- Modo selección / preparación: compendio de jefes + NPC + ítems ----
@@ -1599,7 +1781,7 @@ function renderBossSelect() {
     return `
       <article class="boss-pick ${chosen ? "chosen" : ""}" data-boss="${b.id}" style="--c:${info.color}">
         <div class="boss-thumb">
-          <img src="./assets/pixel-monster.svg" alt="" style="filter:${bossSpriteFilter(b, defeated)}" />
+          <img src="${bossSpriteSrc(b)}" alt="" style="filter:${bossSpriteFilter(b, defeated)}" />
         </div>
         <div class="boss-pick-body">
           <span class="boss-badge">${b.badge}${defeated ? " · derrotado" : ""}</span>
@@ -1667,6 +1849,16 @@ function startBattle() {
   render();
 }
 function backToSelect() {
+  // Desde un combate de expedición, volver a la pantalla de expedición.
+  if (state.expeditionBattle) {
+    state.expeditionBattle = null;
+    state.battleDone = [];
+    state.bossMode = "select";
+    save();
+    goToView("expedition-view");
+    render();
+    return;
+  }
   state.bossMode = "select";
   save();
   render();
@@ -1674,12 +1866,14 @@ function backToSelect() {
 
 function renderBoss() {
   const tut = isTutorial();
-  // alterna entre preparación y batalla (durante el tutorial siempre batalla)
-  const selectMode = !tut && state.bossMode !== "battle";
+  const exp = isExpeditionBattle();
+  // alterna entre preparación y batalla (tutorial y expedición van directo a batalla)
+  const selectMode = !tut && !exp && state.bossMode !== "battle";
   $("#boss-select").classList.toggle("hidden", !selectMode);
   $("#boss-battle").classList.toggle("hidden", selectMode);
-  // en tutorial: sin compendio, sin ataque nocturno
+  // tutorial: sin compendio ni ataque nocturno. Expedición: botón de volver.
   $("#back-to-select").style.display = tut ? "none" : "";
+  $("#back-to-select").textContent = exp ? "← Volver a la expedición" : "← Objetivos de recompensa";
   $("#end-day-button").style.display = tut ? "none" : "";
   if (selectMode) {
     renderBossSelect();
@@ -1690,6 +1884,7 @@ function renderBoss() {
   const boss = activeBoss();
   const hp = bossHp();
   const dead = hp <= 0;
+  $("#boss-sprite").src = bossSpriteSrc(boss);
   $("#boss-sprite").style.filter = bossSpriteFilter(boss, dead);
   $("#boss-type").textContent = boss.badge;
   $("#boss-name").textContent = boss.name;
@@ -1714,6 +1909,8 @@ function renderBoss() {
   // intel — tarjeta compacta única
   if (tut) {
     $("#boss-intel").innerHTML = `<article class="intel-card"><strong>Primer encargo del gremio</strong><p>${boss.desc}</p></article>`;
+  } else if (exp) {
+    $("#boss-intel").innerHTML = `<article class="intel-card"><strong>Boss de Expedición · vida alta</strong><p>${boss.desc}</p></article>`;
   } else {
     const intel = bossIntel();
     $("#boss-intel").innerHTML = `<article class="intel-card"><strong>Intel · ${intel.tier}</strong>${intel.lines.map((l) => `<p>${l}</p>`).join("")}</article>`;
@@ -1730,6 +1927,21 @@ function renderBoss() {
           <strong>${TUTORIAL_NPC.name}</strong>
           <p>${TUTORIAL_NPC.effect}</p>
           <small style="color:#e8923a">${TUTORIAL_NPC.role}</small>
+        </div>
+        <span class="pill npc-active-pill">Activo ✓</span>
+      </article>`;
+  } else if (exp) {
+    // expedición: NPC narrativo del arco, fijo
+    const arc = arcById(boss.arcId);
+    const npc = arc?.npc || { name: "Aliado", role: "Expedición" };
+    $("#npc-toggle").style.visibility = "hidden";
+    $("#npc-list").innerHTML = `
+      <article class="recruit-card active" style="--c:#e8923a">
+        <div class="quest-icon" style="color:#e8923a">★</div>
+        <div>
+          <strong>${npc.name}</strong>
+          <p>NPC narrativo del arco — acompaña en la expedición (+20% daño).</p>
+          <small style="color:#e8923a">${npc.role}</small>
         </div>
         <span class="pill npc-active-pill">Activo ✓</span>
       </article>`;
@@ -1847,31 +2059,52 @@ function renderExpedition() {
     .map((ch, idx) => {
       const prog = state.chapterProgress[ch.id] || 0;
       const total = ch.missions.length;
-      const complete = prog >= total;
+      const cleared = chapterDone(ch.id);
+      const missionsReady = prog >= total;
       const prevDone = idx === 0 || chapterDone(arc.chapters[idx - 1].id);
       const keyLock = ch.requiresKeys && arcKeys(arc.id) < ch.requiresKeys;
       const locked = !prevDone || keyLock;
+      // estado del botón: avanzar misión → combatir boss → completado
+      let action, label, disabled, danger;
+      if (cleared) {
+        action = "chapter"; label = "Completado ✓"; disabled = true;
+      } else if (locked) {
+        action = "chapter"; label = "Bloqueado 🔒"; disabled = true;
+      } else if (missionsReady) {
+        action = "fight"; label = `⚔ Combatir a ${ch.boss}`; disabled = false; danger = true;
+      } else {
+        action = "chapter"; label = "Avanzar misión"; disabled = false;
+      }
       return `
-      <article class="chapter-card ${ch.tone} ${complete ? "complete" : ""} ${locked ? "locked" : ""}">
+      <article class="chapter-card ${ch.tone} ${cleared ? "complete" : ""} ${locked ? "locked" : ""}">
         <header><strong>${ch.title}</strong><span>${ch.level}</span></header>
         <div class="chapter-progress"><span style="width:${(prog / total) * 100}%"></span></div>
-        <small class="chapter-count">${prog} / ${total} misiones</small>
+        <small class="chapter-count">${prog} / ${total} misiones${missionsReady && !cleared ? " · boss listo" : ""}</small>
         <ul>${ch.missions.map((m, i) => `<li class="${i < prog ? "done" : ""}">${m}</li>`).join("")}</ul>
-        <div class="chapter-boss">⚔ Boss: ${ch.boss}</div>
+        <div class="chapter-boss">⚔ Boss: ${ch.boss}${cleared ? " · derrotado" : ""}</div>
         <div class="chapter-key">🗝 ${ch.key}${ch.requiresKeys ? ` · requiere ${ch.requiresKeys} llaves` : ""}</div>
         <blockquote>"${ch.beat}"</blockquote>
-        <button class="complete-button" data-chapter="${ch.id}" type="button" ${locked || complete ? "disabled" : ""}>
-          ${complete ? "Completado ✓" : locked ? "Bloqueado 🔒" : "Avanzar misión"}
+        <button class="complete-button ${danger ? "fight-button" : ""}" data-${action}="${ch.id}" type="button" ${disabled ? "disabled" : ""}>
+          ${label}
         </button>
       </article>`;
     })
     .join("");
   $$("[data-chapter]").forEach((b) =>
-    b.addEventListener("click", () => {
-      const ch = arc.chapters.find((c) => c.id === b.dataset.chapter);
-      advanceChapter(arc, ch);
-    }),
+    b.addEventListener("click", () => advanceChapter(arc, arc.chapters.find((c) => c.id === b.dataset.chapter))),
   );
+  $$("[data-fight]").forEach((b) =>
+    b.addEventListener("click", () => startExpeditionBattle(arc, arc.chapters.find((c) => c.id === b.dataset.fight))),
+  );
+
+  // Teaser de continuación (caps 3-4 pendientes de diseño)
+  if (arc.continuation && arc.chapters.every((c) => chapterDone(c.id))) {
+    $("#chapter-map").innerHTML += `
+      <article class="chapter-card locked continuation">
+        <header><strong>${arc.continuation.title}</strong><span>⏳</span></header>
+        <p class="cont-text">${arc.continuation.text}</p>
+      </article>`;
+  }
 
   $("#expedition-reward").innerHTML = `
     <article class="rare-reward">
@@ -1882,8 +2115,9 @@ function renderExpedition() {
         <small>NPC narrativo: ${arc.npc.name}, ${arc.npc.role} (${arc.npc.attr})</small>
       </div>
     </article>
-    <button class="ghost-button" id="rotate-arc" type="button">Rotar al siguiente arco (semana)</button>`;
-  $("#rotate-arc").addEventListener("click", rotateArc);
+    ${arc.intro || !state.rotationUnlocked ? "" : `<button class="ghost-button" id="rotate-arc" type="button">Rotar al siguiente arco (semana)</button>`}`;
+  const rotateBtn = $("#rotate-arc");
+  if (rotateBtn) rotateBtn.addEventListener("click", rotateArc);
 }
 
 function renderCharacter() {
